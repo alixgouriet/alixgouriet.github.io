@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alix Gouriet — Parcours</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#1a1a1a;--muted:#666;--light:#f5f3ef;--accent:#2d6a4f;
+  --accent2:#95d5b2;--border:#e0ddd8;--card:#fff;--bg:#fafaf8;
+  --serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;
+  --ease:cubic-bezier(.25,.46,.45,.94);
+}
+[data-theme="dark"]{
+  --ink:#f0ede8;--muted:#999;--light:#1e2420;--accent:#95d5b2;
+  --accent2:#2d6a4f;--border:#2a3330;--card:#161c1a;--bg:#0f1412;
+}
+.cursor{position:fixed;width:12px;height:12px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:multiply;}
+[data-theme="dark"] .cursor{mix-blend-mode:screen}
+.cursor-ring{position:fixed;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--accent);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s var(--ease),height .3s var(--ease),opacity .2s;opacity:.6;}
+.cursor-ring.hover{width:56px;height:56px;opacity:.3}
+.cursor-ring.click{width:20px;height:20px;opacity:1}
+body{cursor:none}
+a,button{cursor:none}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.6;transition:background .3s,color .3s;overflow-x:hidden}
+#progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:200;transition:width .1s linear;}
+nav{position:fixed;top:3px;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);transition:all .3s;}
+nav.scrolled{padding:10px 48px;box-shadow:0 2px 20px rgba(0,0,0,.08)}
+.nav-name{font-family:var(--serif);font-size:1.1rem;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{text-decoration:none;font-size:.875rem;color:var(--muted);transition:color .2s;position:relative;padding-bottom:2px;}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--accent);transition:width .3s var(--ease);}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-links a.active{color:var(--ink)}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-size:.75rem;color:var(--muted);cursor:none;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.burger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:4px;cursor:none}
+.burger span{display:block;width:22px;height:1.5px;background:var(--ink);transition:transform .3s,opacity .3s}
+.burger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;inset:0;z-index:90;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:40px;opacity:0;pointer-events:none;transition:opacity .3s var(--ease);}
+.mobile-menu.open{opacity:1;pointer-events:all}
+.mobile-menu a{font-family:var(--serif);font-size:2.5rem;color:var(--ink);text-decoration:none;transition:color .2s;}
+.mobile-menu a:hover{color:var(--accent)}
+.page-wrap{padding:120px 48px 80px;max-width:1000px;margin:0 auto}
+.page-title{font-family:var(--serif);font-size:clamp(2rem,4vw,3rem);margin-bottom:12px;line-height:1.1}
+.page-label{font-size:.72rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.visible{opacity:1;transform:none}
+.reveal-left{opacity:0;transform:translateX(-24px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal-left.visible{opacity:1;transform:none}
+.reveal-right{opacity:0;transform:translateX(24px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal-right.visible{opacity:1;transform:none}
+.delay-1{transition-delay:.1s}.delay-2{transition-delay:.2s}.delay-3{transition-delay:.3s}.delay-4{transition-delay:.4s}.delay-5{transition-delay:.5s}
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:13px 30px;border-radius:8px;font-size:.875rem;font-family:var(--sans);font-weight:500;cursor:none;transition:transform .2s var(--ease),box-shadow .2s;text-decoration:none;display:inline-block;box-shadow:0 4px 20px color-mix(in srgb,var(--accent) 30%,transparent);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px color-mix(in srgb,var(--accent) 40%,transparent)}
+.btn-outline{background:transparent;color:var(--ink);border:1px solid var(--border);padding:13px 30px;border-radius:8px;font-size:.875rem;font-family:var(--sans);cursor:none;transition:all .2s;text-decoration:none;display:inline-block;}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+footer{text-align:center;padding:32px 48px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border)}
+footer a{color:var(--accent);text-decoration:none}
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  nav.scrolled{padding:10px 20px}
+  .nav-links.desktop{display:none}
+  .burger{display:flex}
+  .mobile-menu{display:flex}
+  .page-wrap{padding:100px 24px 60px}
+  .cursor,.cursor-ring{display:none}
+  body,a,button{cursor:auto}
+}
+
+
+.timeline{position:relative;padding-left:28px;margin-top:48px}
+.timeline::before{content:'';position:absolute;left:4px;top:8px;bottom:8px;width:1.5px;background:var(--border)}
+.timeline-item{position:relative;margin-bottom:40px;padding-left:28px}
+.timeline-dot{position:absolute;left:-29px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--accent);transition:transform .2s;}
+.timeline-item:hover .timeline-dot{transform:scale(1.3)}
+.timeline-date{font-size:.78rem;color:var(--accent);margin-bottom:5px;font-weight:500;letter-spacing:.05em}
+.timeline-title{font-weight:500;font-size:1rem;margin-bottom:5px}
+.timeline-sub{font-size:.875rem;color:var(--muted);line-height:1.6}
+
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<div id="progress-bar"></div>
+<nav id="navbar">
+  <a href="index.html" class="nav-name">Alix · Portfolio</a>
+  <div class="nav-links desktop">
+    <a href="index.html">Accueil</a>
+<a href="apropos.html">À propos</a>
+<a href="competences.html">Compétences</a>
+<a href="projets.html">Projets</a>
+<a href="parcours.html" class="active">Parcours</a>
+<a href="contact.html">Contact</a>
+
+    <button class="theme-toggle" id="theme-toggle"><span class="theme-icon">☀️</span></button>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="theme-toggle" id="theme-toggle-mobile" style="display:none"><span class="theme-icon">☀️</span></button>
+    <button class="burger" id="burger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html" class="mobile-link">Accueil</a>
+<a href="apropos.html" class="mobile-link">À propos</a>
+<a href="competences.html" class="mobile-link">Compétences</a>
+<a href="projets.html" class="mobile-link">Projets</a>
+<a href="parcours.html" class="mobile-link">Parcours</a>
+<a href="contact.html" class="mobile-link">Contact</a>
+
+</div>
+
+<div class="page-wrap">
+  <div class="page-label reveal">Mon chemin</div>
+  <h1 class="page-title reveal delay-1">Parcours académique</h1>
+  <div class="timeline">
+    <div class="timeline-item reveal delay-1">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">2025 – 2026 · En cours</div>
+      <div class="timeline-title">BUT Science des Données — 1ère année</div>
+      <div class="timeline-sub">IUT · Modules : R, Python, SQL Oracle, SAE projets, Statistiques</div>
+    </div>
+    <div class="timeline-item reveal delay-2">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">2025</div>
+      <div class="timeline-title">Baccalauréat</div>
+      <div class="timeline-sub">Mention Assez Bien · Spécialités NSI et Mathématiques · Option Maths Expertes</div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 Alix Gouriet · Portfolio Data Science · Fait avec <a href="#">passion</a></footer>
+<script>
+
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animateRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animateRing);})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>ring.classList.add('hover'));
+  el.addEventListener('mouseleave',()=>ring.classList.remove('hover'));
+});
+document.addEventListener('mousedown',()=>ring.classList.add('click'));
+document.addEventListener('mouseup',()=>ring.classList.remove('click'));
+const bar=document.getElementById('progress-bar');
+window.addEventListener('scroll',()=>{bar.style.width=(window.scrollY/(document.body.scrollHeight-window.innerHeight)*100)+'%';});
+const navbar=document.getElementById('navbar');
+window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',window.scrollY>60));
+function applyTheme(dark){
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  document.querySelectorAll('.theme-icon').forEach(i=>i.textContent=dark?'🌙':'☀️');
+  localStorage.setItem('theme',dark?'dark':'light');
+}
+const saved=localStorage.getItem('theme');
+let isDark=saved?saved==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
+applyTheme(isDark);
+document.querySelectorAll('#theme-toggle,#theme-toggle-mobile').forEach(btn=>btn.addEventListener('click',()=>{isDark=!isDark;applyTheme(isDark);}));
+const burger=document.getElementById('burger');
+const mobileMenu=document.getElementById('mobile-menu');
+const tmMobile=document.getElementById('theme-toggle-mobile');
+function checkMobile(){tmMobile.style.display=window.innerWidth<=768?'flex':'none';}
+checkMobile();window.addEventListener('resize',checkMobile);
+burger.addEventListener('click',()=>{const open=burger.classList.toggle('open');mobileMenu.classList.toggle('open',open);document.body.style.overflow=open?'hidden':'';});
+document.querySelectorAll('.mobile-link').forEach(a=>a.addEventListener('click',()=>{burger.classList.remove('open');mobileMenu.classList.remove('open');document.body.style.overflow='';}));
+const revObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.12});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>revObs.observe(el));
+setTimeout(()=>document.querySelectorAll('.instant-reveal').forEach(el=>el.classList.add('visible')),80);
+
+
+</script>
+</body>
+</html>
