@@ -27,6 +27,8 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      # GitHub Pages n'a pas de repli : une URL directe (/projets/greensd) sert 404.html, qui charge le site.
+      - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
