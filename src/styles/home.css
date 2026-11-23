@@ -25,15 +25,77 @@
   gap: 0.25rem 1.25rem;
   margin-top: clamp(1rem, 2vw, 1.25rem);
 }
+.home-portrait-wrap {
+  width: min(100%, 331px);
+  margin: clamp(1.5rem, 3vw, 2rem) auto 0;
+}
 .home-portrait {
   display: block;
-  width: min(100%, 331px);
+  width: 100%;
   height: auto;
   aspect-ratio: 331 / 428;
-  margin: clamp(1.5rem, 3vw, 2rem) auto 0;
   border-radius: var(--ap-radius);
   object-fit: cover;
   background: #d2d2d7;
+}
+
+/*
+ * Mouvement de l'accueil. L'état par défaut est l'état final (rien n'est masqué sans JS ni animation).
+ *  1. Entrée du hero, une seule fois par session (html[data-intro='play'] posé par main.tsx puis retiré) :
+ *     titre 0 ms, sous-titre et statut 60 ms, boutons 120 ms, photo 200 ms ; fin à 700 ms au plus.
+ *  2. Défilement : la photo (enveloppe) glisse de 40 px et passe à 0,96 ; le texte s'estompe. Transform / opacité seulement.
+ */
+@keyframes home-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--in-y, 12px));
+  }
+}
+@keyframes home-photo-in {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+@keyframes home-photo-scroll {
+  to {
+    transform: translateY(40px) scale(0.96);
+  }
+}
+@keyframes home-text-scroll {
+  to {
+    opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-intro='play'] .home-hero h1 {
+    --in-y: 14px;
+    animation: home-in 600ms var(--ap-ease-out) both;
+  }
+  html[data-intro='play'] .home-hero__sub,
+  html[data-intro='play'] .home-hero__status {
+    --in-y: 10px;
+    animation: home-in 560ms var(--ap-ease-out) 60ms both;
+  }
+  html[data-intro='play'] .home-hero .home-links {
+    --in-y: 8px;
+    animation: home-in 540ms var(--ap-ease-out) 120ms both;
+  }
+  html[data-intro='play'] .home-portrait {
+    animation: home-photo-in 500ms var(--ap-ease-out) 200ms both;
+  }
+  @supports (animation-timeline: scroll()) {
+    .home-portrait-wrap {
+      animation: home-photo-scroll linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 70vh;
+    }
+    .home-hero__text {
+      animation: home-text-scroll linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 60vh;
+    }
+  }
 }
 
 /* ---------- Accroche et tuiles projet ---------- */
@@ -64,6 +126,14 @@
   --home-bg: #000;
   --home-line: #3a3a3c;
   --home-res: #ff8fb0;
+}
+.home-tile__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
 }
 .home-tile .ap-eyebrow {
   margin-bottom: 0.5rem;

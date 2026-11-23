@@ -15,7 +15,7 @@ export function AboutPage() {
           <p className="ap-subtitle ap-muted pg-sub">
             Parcours VCOD&nbsp;: Visualisation, Conception d’Outils Décisionnels.
           </p>
-          <figure className="ap-tile ap-tile--gray pg-portrait ap-reveal">
+          <figure className="ap-tile ap-tile--gray pg-portrait ap-reveal ap-reveal--soft">
             <img
               src={`${import.meta.env.BASE_URL}portrait.jpg`}
               width={331}

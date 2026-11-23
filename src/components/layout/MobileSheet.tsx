@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, type CSSProperties, type RefObject } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
 import { NAV } from './nav.ts'
 
@@ -40,12 +40,13 @@ export function MobileSheet({ dialogRef }: { dialogRef: RefObject<HTMLDialogElem
         </button>
       </div>
       <nav className="ap-sheet__nav" aria-label="Menu mobile">
-        {NAV.map((item) => (
+        {NAV.map((item, i) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
             className="ap-sheet__link"
+            style={{ '--i': i } as CSSProperties}
             viewTransition
             onClick={close}
           >

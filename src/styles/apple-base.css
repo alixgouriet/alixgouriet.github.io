@@ -78,6 +78,8 @@
 
   /* Mouvement */
   --ap-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ap-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ap-ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* L'ancien CSS lit --header-h pour ses décalages (sticky, padding) : on l'aligne sur la barre. */
   --header-h: var(--ap-nav-h);
@@ -134,6 +136,13 @@ h3 {
 :focus-visible {
   outline: 3px solid var(--ap-focus);
   outline-offset: 2px;
+  /* Anneau : fondu de 100 ms (couleur seule, aucun déplacement). */
+  animation: ap-focus-in 100ms linear;
+}
+@keyframes ap-focus-in {
+  from {
+    outline-color: transparent;
+  }
 }
 
 /* ---------- Mise en page ---------- */
@@ -173,6 +182,8 @@ h3 {
   padding: clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 4vw, 3rem);
   border-radius: var(--ap-radius);
   overflow: hidden;
+  /* `clip` ne crée pas de conteneur de défilement : les animations view() des enfants suivent la page, pas la tuile. */
+  overflow: clip;
   text-align: center;
   background: var(--ap-bg-gray);
   color: var(--ap-fg);
@@ -309,12 +320,18 @@ h3 {
 .ap-link-more::after {
   content: '\203A';
   content: '\203A' / '';
+  display: inline-block;
   margin-left: 0.3em;
+  transition: transform 150ms var(--ap-ease);
 }
 @media (hover: hover) and (pointer: fine) {
   .ap-link-more:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+  /* Le chevron avance de 3 px au survol de la souris (jamais au clavier). */
+  .ap-link-more:hover::after {
+    transform: translateX(3px);
   }
 }
 
@@ -322,7 +339,18 @@ h3 {
 @keyframes ap-reveal {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.98);
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Variante douce (photos, visuels) : opacité et léger zoom, sans glissement. */
+@keyframes ap-reveal-soft {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
   }
   to {
     opacity: 1;
@@ -335,6 +363,10 @@ h3 {
       animation: ap-reveal linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 35%;
+    }
+    .ap-reveal--soft {
+      animation-name: ap-reveal-soft;
+      animation-range: entry 0% entry 45%;
     }
   }
 }
@@ -369,7 +401,7 @@ h3 {
 }
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .ap-nav {
-    background: rgb(245 245 247 / 0.8);
+    background: rgb(245 245 247 / 0.72);
     -webkit-backdrop-filter: saturate(1.8) blur(20px);
     backdrop-filter: saturate(1.8) blur(20px);
   }
@@ -381,7 +413,38 @@ h3 {
     backdrop-filter: none;
   }
 }
+/* Voile qui renforce le fond après quelques pixels de défilement (opacité seule, pas de redimensionnement). */
+.ap-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(245 245 247 / 0.92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ap-ease);
+}
+html[data-scrolled] .ap-nav::before {
+  opacity: 1;
+}
+@keyframes ap-nav-solid {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ap-nav::before {
+      animation: ap-nav-solid linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 48px;
+    }
+  }
+}
 .ap-nav__inner {
+  position: relative;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -403,7 +466,31 @@ h3 {
   text-decoration: none;
 }
 .ap-nav__links {
+  position: relative;
   display: none;
+}
+/* Soulignement du lien actif : un seul trait qui glisse (translateX + scaleX), posé par Header.tsx. */
+.ap-nav__ind {
+  position: absolute;
+  left: 0;
+  top: 33px;
+  width: 1px;
+  height: 1px;
+  background: var(--ap-text);
+  transform-origin: 0 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+.ap-nav__links[data-ind] .ap-nav__ind {
+  opacity: 1;
+}
+.ap-nav__ind[data-ready] {
+  transition:
+    transform 300ms var(--ap-ease-out),
+    opacity 150ms linear;
+}
+.ap-nav__links[data-ind] .ap-nav__link[aria-current='page'] {
+  text-decoration: none;
 }
 .ap-nav__link {
   display: inline-flex;
@@ -530,17 +617,42 @@ h3 {
   background: var(--ap-bg);
   color: var(--ap-text);
   opacity: 0;
+  transform: translateY(24px);
+  /* Fermeture : 200 ms. */
   transition:
     opacity 200ms var(--ap-ease),
+    transform 200ms var(--ap-ease),
     overlay 200ms allow-discrete,
     display 200ms allow-discrete;
 }
+/* Ouverture type feuille : 350 ms, courbe de tiroir sans rebond. */
 .ap-sheet[open] {
   opacity: 1;
+  transform: none;
+  transition:
+    opacity 250ms var(--ap-ease-sheet),
+    transform 350ms var(--ap-ease-sheet),
+    overlay 350ms allow-discrete,
+    display 350ms allow-discrete;
 }
 @starting-style {
   .ap-sheet[open] {
     opacity: 0;
+    transform: translateY(24px);
+  }
+}
+/* Les liens arrivent en cascade de 30 ms (ouverture seulement). */
+.ap-sheet[open] .ap-sheet__link {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 300ms var(--ap-ease-sheet) calc(60ms + var(--i, 0) * 30ms),
+    transform 350ms var(--ap-ease-sheet) calc(60ms + var(--i, 0) * 30ms);
+}
+@starting-style {
+  .ap-sheet[open] .ap-sheet__link {
+    opacity: 0;
+    transform: translateY(12px);
   }
 }
 .ap-sheet::backdrop {
@@ -562,6 +674,7 @@ h3 {
 }
 .ap-sheet__link {
   display: inline-flex;
+  /* Les liens sont à l'état final par défaut ; seule l'ouverture de la feuille les fait arriver. */
   align-items: center;
   justify-content: center;
   min-height: 52px;
@@ -810,8 +923,36 @@ h3 {
   .ap-sheet__close:active {
     transform: none;
   }
-  .ap-sheet {
+  .ap-link-more::after,
+  .ap-link-more:hover::after {
+    transition: none;
+    transform: none;
+  }
+  .ap-nav__ind[data-ready] {
+    transition: none;
+  }
+  .ap-nav::before {
     transition-duration: 120ms;
+  }
+  .ap-sheet,
+  .ap-sheet[open] {
+    transform: none;
+    transition-property: opacity, overlay, display;
+    transition-duration: 120ms;
+  }
+  .ap-sheet[open] .ap-sheet__link {
+    transition: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @starting-style {
+    .ap-sheet[open] {
+      transform: none;
+    }
+    .ap-sheet[open] .ap-sheet__link {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 

@@ -26,11 +26,18 @@
   --off: var(--color-ardoise);
   --on: var(--color-nuit);
   --fx-y: 0px;
+  /* Tuiles de l'accueil : mobile = fondu + glissement court ; bureau = zoom 0,94 → 1. */
+  --tile-s: 1;
+  --tile-y: 12px;
+  --rise-y: 12px;
   color-scheme: light;
 }
 @media (min-width: 768px) {
   :root {
     --fx-y: 1.5rem;
+    --tile-s: 0.94;
+    --tile-y: 0px;
+    --rise-y: 16px;
   }
 }
 
@@ -295,9 +302,5 @@ main {
   min-height: 1.5em;
 }
 
-/* ---------- Transition de page (fondu, repli : aucune transition) ---------- */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 180ms;
-}
+/* Transition de page : voir effects.css. */
 

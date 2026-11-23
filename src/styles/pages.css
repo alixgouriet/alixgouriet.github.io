@@ -329,19 +329,70 @@
   content: '\203A' / '';
   margin-left: 0.3em;
 }
+.pg-more::after {
+  display: inline-block;
+  transition: transform 150ms var(--ap-ease);
+}
 a.pg-tile:active,
 a.pg-next:active {
   transform: scale(0.985);
 }
+/* Ombre douce : pseudo-élément du <li> dont seule l'opacité change (le lien porte le zoom, l'<li> la révélation). */
+.pg-cell {
+  position: relative;
+  isolation: isolate;
+}
+.pg-cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--ap-radius);
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--ap-ease),
+    transform 200ms var(--ap-ease);
+}
 @media (hover: hover) and (pointer: fine) {
   a.pg-tile:hover,
   a.pg-next:hover {
-    transform: scale(1.012);
+    transform: scale(1.01);
+  }
+  .pg-cell:has(> a.pg-tile:hover)::after {
+    opacity: 1;
+    transform: scale(1.01);
   }
   a.pg-tile:hover .pg-more,
   a.pg-next:hover .pg-more {
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+  a.pg-tile:hover .pg-more::after,
+  a.pg-next:hover .pg-more::after {
+    transform: translateX(3px);
+  }
+}
+/* Deuxième colonne : entrée décalée de quelques pour cent de la plage (≈ 40 ms de défilement). */
+@supports (animation-timeline: view()) {
+  @media (min-width: 768px) {
+    .pg-cell:nth-child(even) {
+      animation-range: entry 5% entry 40%;
+    }
+  }
+}
+
+/* Fiche : la couverture se pose au chargement (zoom 0,985 → 1) ; le reste de la page ne s'anime pas. */
+@keyframes pg-cover-in {
+  from {
+    transform: scale(0.985);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ap-tile.pg-cover {
+    transform-origin: 50% 0;
+    animation: pg-cover-in 500ms var(--ap-ease-out) both;
   }
 }
 .pg-empty {
@@ -707,8 +758,17 @@ a.pg-next:active {
 @media (prefers-reduced-motion: reduce) {
   .pg-tile,
   .pg-next,
-  .pg-chip {
+  .pg-chip,
+  .pg-cell::after,
+  .pg-more::after {
     transition: none;
+  }
+  .pg-cell:has(> a.pg-tile:hover)::after {
+    transform: none;
+  }
+  a.pg-tile:hover .pg-more::after,
+  a.pg-next:hover .pg-more::after {
+    transform: none;
   }
   a.pg-tile:hover,
   a.pg-next:hover,

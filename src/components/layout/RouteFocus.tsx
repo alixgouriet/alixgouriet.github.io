@@ -42,8 +42,16 @@ export function RouteFocus() {
   useEffect(() => {
     window.history.scrollRestoration = 'manual'
     let raf = 0
+    const root = document.documentElement
+    // Barre : le fond se renforce après quelques pixels (écrit seulement quand l'état change).
+    const mark = () => {
+      const on = window.scrollY > 8
+      if (root.hasAttribute('data-scrolled') !== on) root.toggleAttribute('data-scrolled', on)
+    }
+    mark()
     const save = () => {
       raf = 0
+      mark()
       const p = readPositions()
       p[window.history.state?.key ?? 'default'] = window.scrollY
       writePositions(p)

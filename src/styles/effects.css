@@ -25,6 +25,30 @@
     transform: scaleX(0);
   }
 }
+/* Tuiles de l'accueil : le visuel entre en zoom ; titre et ligne se révèlent l'un après l'autre. */
+@keyframes fx-tile {
+  from {
+    opacity: 0;
+    transform: translateY(var(--tile-y)) scale(var(--tile-s));
+  }
+}
+@keyframes fx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise-y));
+  }
+}
+/* Tuile qui sort : léger recul, contenu qui s'estompe. */
+@keyframes fx-leave {
+  to {
+    transform: scale(0.97);
+  }
+}
+@keyframes fx-leave-body {
+  to {
+    opacity: 0.45;
+  }
+}
 @keyframes fx-lit {
   from {
     color: var(--off);
@@ -51,6 +75,34 @@
       animation: fx-bar linear both;
       animation-timeline: view();
       animation-range: entry 20% entry 80%;
+    }
+    [data-fx='tile'] {
+      animation: fx-tile linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+    [data-fx='rise'],
+    [data-fx='rise-late'] {
+      animation: fx-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    [data-fx='rise-late'] {
+      animation-range: entry 8% entry 50%;
+    }
+    /* Recouvrement (bureau) : la tuile qui quitte l'écran recule pendant que la suivante arrive. */
+    @media (min-width: 768px) {
+      .home-tile {
+        transform-origin: 50% 0;
+        animation: fx-leave linear both;
+        animation-timeline: view();
+        animation-range: exit 25% exit 100%;
+      }
+      .home-tile__body {
+        animation: fx-leave-body linear both;
+        animation-timeline: view(block);
+        animation-range: exit 25% exit 100%;
+      }
     }
     /* Phrase : chaque mot s'éclaire quand il passe dans la moitié basse de l'écran (bureau seulement). */
     @media (min-width: 768px) {
@@ -83,6 +135,18 @@
     [data-fx='bar'][data-state='pending'] {
       transform: scaleX(0);
     }
+    [data-fx='tile'][data-state='pending'] {
+      opacity: 0;
+      transform: translateY(var(--tile-y)) scale(var(--tile-s));
+    }
+    [data-fx='rise'][data-state='pending'],
+    [data-fx='rise-late'][data-state='pending'] {
+      opacity: 0;
+      transform: translateY(var(--rise-y));
+    }
+    [data-fx='rise-late'] {
+      transition-delay: 70ms;
+    }
     [data-fx='lit'] .w {
       transition: color 500ms var(--ease-out);
       transition-delay: calc(var(--i) * 40ms);
@@ -90,6 +154,58 @@
     [data-fx='lit'][data-state='pending'] .w {
       color: var(--off);
     }
+  }
+}
+
+/*
+ * ----- Transition de page (View Transitions API, via <Link viewTransition>) -----
+ * Seul <main> bouge : fondu 200 ms + glissement de 8 px à l'arrivée. La barre est un groupe à part,
+ * figé (aucune animation) ; le reste de la page (bandeau, pied) bascule sans fondu.
+ * Navigateurs sans l'API : changement de page immédiat. Défilement et focus : RouteFocus.tsx.
+ */
+.ap-nav {
+  view-transition-name: site-nav;
+}
+main#contenu {
+  view-transition-name: page;
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-rise {
+  from {
+    transform: translateY(8px);
+  }
+}
+::view-transition-group(page),
+::view-transition-group(site-nav) {
+  animation-duration: 0s;
+}
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(site-nav),
+::view-transition-new(site-nav) {
+  animation: none;
+}
+::view-transition-old(root),
+::view-transition-old(site-nav) {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(page) {
+    animation: vt-fade-out 200ms linear both;
+  }
+  ::view-transition-new(page) {
+    animation:
+      vt-fade-in 200ms linear both,
+      vt-rise 200ms var(--ease-out) both;
   }
 }
 
@@ -102,5 +218,8 @@
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none;
+  }
+  ::view-transition-old(page) {
+    display: none;
   }
 }

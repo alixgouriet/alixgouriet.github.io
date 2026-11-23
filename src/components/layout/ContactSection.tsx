@@ -68,7 +68,7 @@ export function ContactSection({ asPage = false }: { asPage?: boolean }) {
   return (
     <section className="ap-contact ap-dark" aria-labelledby="contact-title">
       <div className="ap-container ap-contact__inner">
-        <h1 id="contact-title" className="ap-title-xl ap-reveal">
+        <h1 id="contact-title" className="ap-title-xl">
           Contact
         </h1>
         <p className="ap-subtitle ap-contact__lead">

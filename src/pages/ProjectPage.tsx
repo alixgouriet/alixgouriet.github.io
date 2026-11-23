@@ -1,14 +1,20 @@
-import { lazy, Suspense, type ComponentType } from 'react'
+import type { ComponentType } from 'react'
 import { Link, useParams } from 'react-router'
 import { ProjectVisual } from '../charts/ProjectVisual.tsx'
 import { availableProjects, findProject, toolLabel } from '../data/derive.ts'
 import { NotFoundPage } from './NotFoundPage.tsx'
+import PrixImmobiliers from '../content/projects/prix-immobiliers-niortais.tsx'
+import VillesNatalistes from '../content/projects/villes-natalistes.tsx'
+import GreenSD from '../content/projects/greensd.tsx'
+import EduCheck from '../content/projects/educheck.tsx'
 
+// Corps des fiches chargés avec la page (déjà chargée à la demande par le routeur) :
+// pas de « Chargement… » qui se remplace ensuite, donc pas de décalage de mise en page.
 const bodies: Record<string, ComponentType> = {
-  'prix-immobiliers-niortais': lazy(() => import('../content/projects/prix-immobiliers-niortais.tsx')),
-  'villes-natalistes': lazy(() => import('../content/projects/villes-natalistes.tsx')),
-  greensd: lazy(() => import('../content/projects/greensd.tsx')),
-  educheck: lazy(() => import('../content/projects/educheck.tsx')),
+  'prix-immobiliers-niortais': PrixImmobiliers,
+  'villes-natalistes': VillesNatalistes,
+  greensd: GreenSD,
+  educheck: EduCheck,
 }
 
 /** Titre du visuel de chaque fiche : il dit ce que l’on voit, sans promettre un résultat de plus. */
@@ -70,9 +76,7 @@ export function ProjectPage() {
       <section className="ap-section ap-section--white pg-read">
         <div className="ap-container ap-container--narrow">
           <article className="pg-prose">
-            <Suspense fallback={<p className="ap-muted">Chargement…</p>}>
-              <Body />
-            </Suspense>
+            <Body />
           </article>
         </div>
       </section>
@@ -85,7 +89,7 @@ export function ProjectPage() {
           {project.slug === 'prix-immobiliers-niortais' ? (
             <p className="ap-muted ap-center pg-visual-note">Nuage illustratif, pas des données réelles.</p>
           ) : null}
-          <div className="ap-tile ap-tile--white pg-visual-tile ap-reveal">
+          <div className="ap-tile ap-tile--white pg-visual-tile ap-reveal ap-reveal--soft">
             <ProjectVisual slug={project.slug} />
           </div>
         </div>
