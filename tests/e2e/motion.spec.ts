@@ -47,7 +47,8 @@ const VISIBLE_STATE = () => {
     const r = el.getBoundingClientRect()
     if (cs.display === 'none' || cs.visibility === 'hidden' || r.width === 0 || r.height === 0) continue
     if (cs.opacity !== '1') out.push(`${el.tagName.toLowerCase()}.${el.className} opacity=${cs.opacity}`)
-    if (!identity(cs.transform)) out.push(`${el.tagName.toLowerCase()}.${el.className} transform=${cs.transform}`)
+    // Illustrations SVG : rotations d'attribut purement graphiques (statiques), pas un résidu de mouvement.
+    if (!el.closest('.ill-frame') && !identity(cs.transform)) out.push(`${el.tagName.toLowerCase()}.${el.className} transform=${cs.transform}`)
   }
   return out
 }

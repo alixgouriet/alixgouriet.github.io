@@ -1,6 +1,7 @@
 import { pendingProjects, recentFirst } from '../../data/derive.ts'
 import type { PendingProject } from '../../data/types.ts'
 import { TOOL_LABELS } from '../../data/tools.ts'
+import { Illustration } from '../../charts/illustrations/Illustration.tsx'
 
 /** Réalisations sans fiche : demi-tuiles non cliquables (aucun lien, aucun focus). */
 export function PendingTiles() {
@@ -17,6 +18,7 @@ export function PendingTiles() {
             aria-labelledby={id}
             aria-disabled="true"
           >
+            <Illustration id={p.id} size="tile" />
             <p className="ap-eyebrow">{p.period}</p>
             <h3 id={id} className="ap-title-md">
               {p.title}

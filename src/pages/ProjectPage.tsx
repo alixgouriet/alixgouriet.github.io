@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { Link, useParams } from 'react-router'
+import { Illustration } from '../charts/illustrations/Illustration.tsx'
 import { ProjectVisual } from '../charts/ProjectVisual.tsx'
 import { availableProjects, findProject, toolLabel } from '../data/derive.ts'
 import { NotFoundPage } from './NotFoundPage.tsx'
@@ -51,6 +52,7 @@ export function ProjectPage() {
               <span className="sr-only">Résultat : </span>
               {project.result}
             </p>
+            <Illustration id={project.slug} size="cover" onDark />
             <dl className="pg-cover-meta">
               <div>
                 <dt>Période</dt>

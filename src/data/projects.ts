@@ -42,7 +42,7 @@ export const projects: Project[] = [
     technologies: ['Excel', 'Statistiques'],
     summary:
       'Comparer un échantillon des villes les plus natalistes à la France entière, en binôme.',
-    result: 'Population +5 % contre +6 % en France (2016 à 2022)',
+    result: 'Population +5\u202F% contre +6\u202F% en France (2016 à 2022)',
   },
   {
     status: 'disponible',

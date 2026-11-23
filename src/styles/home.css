@@ -36,13 +36,13 @@
   aspect-ratio: 331 / 428;
   border-radius: var(--ap-radius);
   object-fit: cover;
-  background: #d2d2d7;
+  background: var(--ap-hair-img);
 }
 
 /*
  * Mouvement de l'accueil. L'état par défaut est l'état final (rien n'est masqué sans JS ni animation).
  *  1. Entrée du hero, une seule fois par session (html[data-intro='play'] posé par main.tsx puis retiré) :
- *     titre 0 ms, sous-titre et statut 60 ms, boutons 120 ms, photo 200 ms ; fin à 700 ms au plus.
+ *     titre 0 ms, sous-titre et statut 40 ms, boutons 80 ms, photo 140 ms ; fin à 480 ms au plus.
  *  2. Défilement : la photo (enveloppe) glisse de 40 px et passe à 0,96 ; le texte s'estompe. Transform / opacité seulement.
  */
 @keyframes home-in {
@@ -70,30 +70,30 @@
 @media (prefers-reduced-motion: no-preference) {
   html[data-intro='play'] .home-hero h1 {
     --in-y: 14px;
-    animation: home-in 600ms var(--ap-ease-out) both;
+    animation: home-in 400ms var(--ap-ease-out) both;
   }
   html[data-intro='play'] .home-hero__sub,
   html[data-intro='play'] .home-hero__status {
     --in-y: 10px;
-    animation: home-in 560ms var(--ap-ease-out) 60ms both;
+    animation: home-in 380ms var(--ap-ease-out) 40ms both;
   }
   html[data-intro='play'] .home-hero .home-links {
     --in-y: 8px;
-    animation: home-in 540ms var(--ap-ease-out) 120ms both;
+    animation: home-in 360ms var(--ap-ease-out) 80ms both;
   }
   html[data-intro='play'] .home-portrait {
-    animation: home-photo-in 500ms var(--ap-ease-out) 200ms both;
+    animation: home-photo-in 340ms var(--ap-ease-out) 140ms both;
   }
   @supports (animation-timeline: scroll()) {
     .home-portrait-wrap {
       animation: home-photo-scroll linear both;
       animation-timeline: scroll(root);
-      animation-range: 0px 70vh;
+      animation-range: 0px 50vh;
     }
     .home-hero__text {
       animation: home-text-scroll linear both;
       animation-timeline: scroll(root);
-      animation-range: 0px 60vh;
+      animation-range: 0px 42vh;
     }
   }
 }
@@ -114,8 +114,8 @@
   margin-inline: auto;
 }
 .home-tile {
-  --home-bg: var(--ap-bg-gray);
-  --home-line: #d2d2d7;
+  --home-bg: var(--ap-tile-gray);
+  --home-line: var(--ap-line-tile);
   --home-res: #c6285e;
   justify-content: flex-start;
   min-height: clamp(40rem, 52vw, 44rem);

@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import type { Project } from '../../data/types.ts'
 import { projectKey, subtitleOf } from '../../data/derive.ts'
+import { Illustration } from '../../charts/illustrations/Illustration.tsx'
 
 interface Props {
   items: Project[]
@@ -24,6 +25,9 @@ function ProjectTile({ p, n }: { p: Project; n: number }) {
   const link = p.status === 'disponible'
   const body = (
     <>
+      <span className="pg-thumb" aria-hidden="true">
+        <Illustration id={p.status === 'disponible' ? p.slug : p.id} size="thumb" />
+      </span>
       <span className="pg-num tnum" aria-hidden="true">
         {String(n).padStart(2, '0')}
       </span>

@@ -24,7 +24,7 @@ export function GrowthBars({
           <li key={r.label} className="bar-row">
             <span className="bar-label">
               <span>{r.label}</span>
-              <span className="mono">+{r.value}\u202F%</span>
+              <span className="mono">+{r.value}{'\u202F'}%</span>
             </span>
             <span className="bar-track" aria-hidden="true">
               <span

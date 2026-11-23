@@ -25,12 +25,14 @@
   --gap-ink: var(--color-residu);
   --off: var(--color-ardoise);
   --on: var(--color-nuit);
+  --er-paper: #ffffff;
+  --er-ink: var(--color-nuit);
+  --er-link: var(--color-cobalt);
   --fx-y: 0px;
   /* Tuiles de l'accueil : mobile = fondu + glissement court ; bureau = zoom 0,94 → 1. */
   --tile-s: 1;
   --tile-y: 12px;
   --rise-y: 12px;
-  color-scheme: light;
 }
 @media (min-width: 768px) {
   :root {
@@ -39,6 +41,20 @@
     --tile-y: 0px;
     --rise-y: 16px;
   }
+}
+
+/* Thème sombre : couleurs des visuels de src/charts (fiche projet). Sur l'accueil, home.css les remplace par les jetons --ap-*. */
+html[data-theme='dark'] {
+  --fg: #f5f5f7;
+  --muted: #a1a1a6;
+  --accent: #2997ff;
+  --line: #424245;
+  --gap-ink: #ff8fb0;
+  --off: #86868b;
+  --on: #f5f5f7;
+  --er-paper: #1d1d1f;
+  --er-ink: #f5f5f7;
+  --er-link: #2997ff;
 }
 
 html {
@@ -85,10 +101,10 @@ h1:focus {
   cursor: pointer;
   text-decoration: none;
   transition:
-    background-color 150ms var(--ease-out),
-    border-color 150ms var(--ease-out),
-    color 150ms var(--ease-out),
-    transform 120ms var(--ease-out);
+    background-color 100ms var(--ease-out),
+    border-color 100ms var(--ease-out),
+    color 100ms var(--ease-out),
+    transform 100ms var(--ease-out);
 }
 .btn:active {
   transform: scale(0.97);
@@ -247,7 +263,7 @@ main {
   margin: 0;
 }
 .er-frame {
-  background: var(--color-blanc);
+  background: var(--er-paper);
   border-radius: 12px;
   padding: 8px;
   container-type: inline-size;
@@ -269,23 +285,23 @@ main {
   }
 }
 .er-box {
-  fill: var(--color-blanc);
-  stroke: var(--color-nuit);
+  fill: var(--er-paper);
+  stroke: var(--er-ink);
   stroke-width: 1.25;
 }
 .er-head {
-  fill: var(--color-nuit);
+  fill: var(--er-ink);
 }
 .er-title {
   font: 600 14px var(--font-mono);
-  fill: var(--color-blanc);
+  fill: var(--er-paper);
 }
 .er-col {
   font: 13px var(--font-mono);
-  fill: var(--color-nuit);
+  fill: var(--er-ink);
 }
 .er-link {
-  stroke: var(--color-cobalt);
+  stroke: var(--er-link);
   stroke-width: 1.75;
   fill: none;
 }

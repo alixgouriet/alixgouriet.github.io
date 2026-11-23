@@ -75,7 +75,7 @@ async function sweep(page: Page, onStep?: (y: number) => Promise<void>, stepPx?:
 
 /* ------------------------------------------------------------------ (1) épinglage et progression */
 test.describe('scènes : épinglage et progression --p (1280 × 800)', () => {
-  test('4 scènes ; stage sticky top 0 ; hauteurs (200 + 24 × étapes) svh', async ({ page }, ti) => {
+  test('4 scènes ; stage sticky top 0 ; hauteurs (150 + 18 × étapes) svh', async ({ page }, ti) => {
     onlyDesktop(ti)
     await openHome(page, PINNED)
     const info = await page.evaluate(() =>
@@ -90,7 +90,7 @@ test.describe('scènes : épinglage et progression --p (1280 × 800)', () => {
       expect(s.top, `scène ${i + 1} top`).toBe('0px')
       const slug = s.slug!.replace('scene--', '')
       const steps = SCENES.find((x) => x.slug === slug)!.steps
-      expect(Math.abs(s.h - (2 + 0.24 * steps) * PINNED.height), `hauteur ${slug}`).toBeLessThanOrEqual(2)
+      expect(Math.abs(s.h - (1.5 + 0.18 * steps) * PINNED.height), `hauteur ${slug}`).toBeLessThanOrEqual(2)
     }
   })
 

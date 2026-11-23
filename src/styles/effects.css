@@ -64,31 +64,31 @@
     [data-fx='reveal'] {
       animation: fx-reveal linear both;
       animation-timeline: view();
-      animation-range: entry 5% entry 55%;
+      animation-range: entry 5% entry 40%;
     }
     [data-fx='draw'] {
       animation: fx-draw linear both;
       animation-timeline: view();
-      animation-range: entry 10% entry 70%;
+      animation-range: entry 10% entry 52%;
     }
     [data-fx='bar'] {
       animation: fx-bar linear both;
       animation-timeline: view();
-      animation-range: entry 20% entry 80%;
+      animation-range: entry 20% entry 62%;
     }
     [data-fx='tile'] {
       animation: fx-tile linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 45%;
+      animation-range: entry 0% entry 32%;
     }
     [data-fx='rise'],
     [data-fx='rise-late'] {
       animation: fx-rise linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 40%;
+      animation-range: entry 0% entry 28%;
     }
     [data-fx='rise-late'] {
-      animation-range: entry 8% entry 50%;
+      animation-range: entry 8% entry 36%;
     }
     /* Recouvrement (bureau) : la tuile qui quitte l'écran recule pendant que la suivante arrive. */
     @media (min-width: 768px) {
@@ -109,7 +109,7 @@
       [data-fx='lit'] .w {
         animation: fx-lit linear both;
         animation-timeline: view();
-        animation-range: cover 18% cover 38%;
+        animation-range: cover 18% cover 32%;
       }
     }
   }
@@ -118,9 +118,9 @@
   @supports not (animation-timeline: view()) {
     [data-fx] {
       transition:
-        opacity 500ms var(--ease-out),
-        transform 500ms var(--ease-out),
-        clip-path 600ms var(--ease-out);
+        opacity 340ms var(--ease-out),
+        transform 340ms var(--ease-out),
+        clip-path 400ms var(--ease-out);
     }
     [data-fx='reveal'][data-state='pending'] {
       opacity: 0;
@@ -145,11 +145,11 @@
       transform: translateY(var(--rise-y));
     }
     [data-fx='rise-late'] {
-      transition-delay: 70ms;
+      transition-delay: 50ms;
     }
     [data-fx='lit'] .w {
-      transition: color 500ms var(--ease-out);
-      transition-delay: calc(var(--i) * 40ms);
+      transition: color 340ms var(--ease-out);
+      transition-delay: calc(var(--i) * 30ms);
     }
     [data-fx='lit'][data-state='pending'] .w {
       color: var(--off);
@@ -159,7 +159,7 @@
 
 /*
  * ----- Transition de page (View Transitions API, via <Link viewTransition>) -----
- * Seul <main> bouge : fondu 200 ms + glissement de 8 px à l'arrivée. La barre est un groupe à part,
+ * Seul <main> bouge : fondu 150 ms + glissement de 8 px à l'arrivée. La barre est un groupe à part,
  * figé (aucune animation) ; le reste de la page (bandeau, pied) bascule sans fondu.
  * Navigateurs sans l'API : changement de page immédiat. Défilement et focus : RouteFocus.tsx.
  */
@@ -200,12 +200,12 @@ main#contenu {
 }
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(page) {
-    animation: vt-fade-out 200ms linear both;
+    animation: vt-fade-out 150ms linear both;
   }
   ::view-transition-new(page) {
     animation:
-      vt-fade-in 200ms linear both,
-      vt-rise 200ms var(--ease-out) both;
+      vt-fade-in 150ms linear both,
+      vt-rise 150ms var(--ease-out) both;
   }
 }
 

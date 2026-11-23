@@ -78,8 +78,8 @@ export const PRIX_STEPS: (SceneStepText & { tag: string })[] = [
  * « France entière », « même base zéro »). Aucun autre chiffre.
  */
 export const VILLES_STEPS: SceneStepText[] = [
-  { label: 'Échantillon', text: 'Dans mon échantillon de villes natalistes, la population augmente de 5 % entre 2016 et 2022.' },
-  { label: 'France entière', text: 'Sur la même période, elle augmente de 6 % en France entière, sur la même base zéro.' },
+  { label: 'Échantillon', text: 'Dans mon échantillon de villes natalistes, la population augmente de 5\u202F% entre 2016 et 2022.' },
+  { label: 'France entière', text: 'Sur la même période, elle augmente de 6\u202F% en France entière, sur la même base zéro.' },
 ]
 
 export const SCENE_STEPS: Record<string, SceneStepText[]> = {

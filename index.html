@@ -5,6 +5,33 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f5f5f7" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Thème : posé avant le premier rendu (préférence mémorisée, sinon prefers-color-scheme). Minimal, protégé par try/catch. -->
+    <script>
+      (function () {
+        var d = document.documentElement,
+          t = null
+        try {
+          t = localStorage.getItem('theme')
+        } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          try {
+            t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          } catch (e) {
+            t = 'light'
+          }
+        }
+        d.setAttribute('data-theme', t)
+        d.style.colorScheme = t
+        var m = document.querySelector('meta[name="theme-color"]')
+        if (m) m.setAttribute('content', t === 'dark' ? '#161617' : '#f5f5f7')
+      })()
+    </script>
+    <style>
+      html[data-theme='dark'] {
+        background: #000;
+      }
+    </style>
     <meta
       name="description"
       content="Alix Gouriet, étudiant en 2e année de BUT Science des Données à l’IUT de Niort : projets, outils et contact."

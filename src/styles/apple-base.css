@@ -27,6 +27,7 @@
  *  .ap-reveal               état final par défaut ; entrée CSS (opacité + translateY + scale) liée au défilement
  *                           via animation-timeline: view() sous @supports ; aucun mouvement si reduced-motion. Pas de JS.
  *
+ * Thème : `html[data-theme='dark']` (posé avant le premier rendu par index.html) redéfinit les jetons du bloc :root ; voir « Thème sombre » plus bas.
  * Variables (--ap-*) : voir le bloc :root ci-dessous. En surface sombre (.ap-section--dark, .ap-tile--dark, .ap-dark)
  * --ap-fg, --ap-fg-2, --ap-link-c, --ap-on-link et --ap-focus sont redéfinis : utilisez-les pour rester lisible sur les deux fonds.
  * Composants de la structure (barre, menu, bandeau, pied de page, page contact) : préfixes .ap-nav, .ap-sheet, .ap-promo, .ap-footer, .ap-contact.
@@ -40,6 +41,8 @@
   --ap-text-2-dark: #a1a1a6;
   --ap-bg: #ffffff;
   --ap-bg-gray: #f5f5f7;
+  /* Tuile grise : #f5f5f7 en clair, #1d1d1f en sombre (la section grise passe à #161617). */
+  --ap-tile-gray: #f5f5f7;
   --ap-bg-dark: #000000;
   --ap-link: #0066cc;
   --ap-link-dark: #2997ff;
@@ -47,6 +50,17 @@
   /* Survol : #0077ed (doc) donnait 4,32:1 avec du blanc, sous AA ; on assombrit plutôt qu'on n'éclaircit (5,57:1). */
   --ap-btn-hover: #0066cc;
   --ap-nav-ink: #424245;
+  --ap-nav-hover: #000000;
+  --ap-nav-glass: rgb(245 245 247 / 0.72);
+  --ap-nav-solid: rgb(245 245 247 / 0.92);
+  --ap-hair: rgb(0 0 0 / 0.12);
+  --ap-hair-nav: rgb(0 0 0 / 0.06);
+  --ap-tile-edge: transparent;
+  --ap-shadow: rgb(0 0 0 / 0.12);
+  --ap-skip-fg: #ffffff;
+  --ap-line-tile: #d2d2d7;
+  --ap-hair-img: #d2d2d7;
+  --pg-seg-on: #ffffff;
 
   /* Rôles adaptés au fond courant (redéfinis en surface sombre) */
   --ap-fg: var(--ap-text);
@@ -56,6 +70,7 @@
   --ap-link-c: var(--ap-link);
   --ap-on-link: #ffffff;
   --ap-focus: var(--ap-btn);
+  color-scheme: light dark;
 
   /* Formes et rythme */
   --ap-radius: 28px;
@@ -95,6 +110,48 @@
     --ap-radius: 18px;
     --ap-gap: 20px;
   }
+}
+
+/*
+ * ---------- Thème sombre ----------
+ * index.html pose data-theme (« light » ou « dark ») avant le premier rendu : préférence mémorisée, sinon prefers-color-scheme.
+ * Les jetons ci-dessous remplacent ceux du bloc :root ; tout le reste du CSS lit ces jetons. Contrastes : DESIGN_SYSTEM_V4.md.
+ * Pas de bloc @media (prefers-color-scheme) redondant : le site est une application (rien ne s'affiche sans JS), le script en ligne décide.
+ */
+html[data-theme='light'] {
+  color-scheme: light;
+}
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --ap-text: #f5f5f7;
+  --ap-text-2: #a1a1a6;
+  --ap-fg-3: #a1a1a6;
+  --ap-bg: #000000;
+  --ap-bg-gray: #161617;
+  --ap-tile-gray: #1d1d1f;
+  --ap-link: #2997ff;
+  --ap-btn: #0071e3;
+  --ap-btn-hover: #0066cc;
+  --ap-nav-ink: #d2d2d7;
+  --ap-nav-hover: #ffffff;
+  --ap-nav-glass: rgb(22 22 23 / 0.8);
+  --ap-nav-solid: rgb(22 22 23 / 0.92);
+  --ap-hair: rgb(255 255 255 / 0.12);
+  --ap-hair-nav: rgb(255 255 255 / 0.1);
+  --ap-tile-edge: rgb(255 255 255 / 0.12);
+  --ap-shadow: rgb(0 0 0 / 0.5);
+  --ap-skip-fg: #000000;
+  --ap-line-tile: #424245;
+  --ap-hair-img: #424245;
+  --pg-seg-on: #3a3a3c;
+  --ap-on-link: #000000;
+  --ap-focus: #2997ff;
+}
+/* Pendant la bascule : aucune transition (sinon seuls les boutons et liens fondraient, le reste changerait d'un coup). */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 .ap-dark,
@@ -185,17 +242,19 @@ h3 {
   /* `clip` ne crée pas de conteneur de défilement : les animations view() des enfants suivent la page, pas la tuile. */
   overflow: clip;
   text-align: center;
-  background: var(--ap-bg-gray);
+  background: var(--ap-tile-gray);
   color: var(--ap-fg);
 }
 .ap-tile--gray {
-  background: var(--ap-bg-gray);
+  background: var(--ap-tile-gray);
 }
 .ap-tile--white {
   background: var(--ap-bg);
 }
 .ap-tile--dark {
   background: var(--ap-bg-dark);
+  /* Liseré visible seulement en thème sombre (tuile noire sur fond noir). */
+  box-shadow: inset 0 0 0 1px var(--ap-tile-edge);
 }
 .ap-tile--tall {
   min-height: clamp(30rem, 62vw, 40rem);
@@ -279,9 +338,9 @@ h3 {
   text-decoration: none;
   cursor: pointer;
   transition:
-    background-color 150ms var(--ap-ease),
-    border-color 150ms var(--ap-ease),
-    color 150ms var(--ap-ease),
+    background-color 100ms var(--ap-ease),
+    border-color 100ms var(--ap-ease),
+    color 100ms var(--ap-ease),
     transform 100ms var(--ap-ease);
 }
 .ap-pill {
@@ -322,7 +381,7 @@ h3 {
   content: '\203A' / '';
   display: inline-block;
   margin-left: 0.3em;
-  transition: transform 150ms var(--ap-ease);
+  transition: transform 100ms var(--ap-ease);
 }
 @media (hover: hover) and (pointer: fine) {
   .ap-link-more:hover {
@@ -362,11 +421,11 @@ h3 {
     .ap-reveal {
       animation: ap-reveal linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 35%;
+      animation-range: entry 0% entry 25%;
     }
     .ap-reveal--soft {
       animation-name: ap-reveal-soft;
-      animation-range: entry 0% entry 45%;
+      animation-range: entry 0% entry 32%;
     }
   }
 }
@@ -380,12 +439,12 @@ h3 {
   padding: 12px 18px;
   border-radius: var(--ap-pill-radius);
   background: var(--ap-text);
-  color: #ffffff;
+  color: var(--ap-skip-fg);
   transform: translateY(-200%);
 }
 .ap-skip:focus {
   transform: none;
-  outline: 3px solid var(--ap-btn);
+  outline: 3px solid var(--ap-focus);
   outline-offset: 2px;
 }
 
@@ -397,11 +456,11 @@ h3 {
   height: var(--ap-nav-h);
   /* Repli opaque (aucun support de backdrop-filter, transparence réduite). */
   background: var(--ap-bg-gray);
-  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.06);
+  box-shadow: inset 0 -1px 0 var(--ap-hair-nav);
 }
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .ap-nav {
-    background: rgb(245 245 247 / 0.72);
+    background: var(--ap-nav-glass);
     -webkit-backdrop-filter: saturate(1.8) blur(20px);
     backdrop-filter: saturate(1.8) blur(20px);
   }
@@ -418,10 +477,10 @@ h3 {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgb(245 245 247 / 0.92);
+  background: var(--ap-nav-solid);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms var(--ap-ease);
+  transition: opacity 120ms var(--ap-ease);
 }
 html[data-scrolled] .ap-nav::before {
   opacity: 1;
@@ -486,8 +545,8 @@ html[data-scrolled] .ap-nav::before {
 }
 .ap-nav__ind[data-ready] {
   transition:
-    transform 300ms var(--ap-ease-out),
-    opacity 150ms linear;
+    transform 220ms var(--ap-ease-out),
+    opacity 100ms linear;
 }
 .ap-nav__links[data-ind] .ap-nav__link[aria-current='page'] {
   text-decoration: none;
@@ -504,7 +563,7 @@ html[data-scrolled] .ap-nav::before {
   letter-spacing: 0;
   color: var(--ap-nav-ink);
   text-decoration: none;
-  transition: color 150ms var(--ap-ease);
+  transition: color 100ms var(--ap-ease);
 }
 .ap-nav__link[aria-current='page'] {
   color: var(--ap-text);
@@ -519,7 +578,7 @@ html[data-scrolled] .ap-nav::before {
 }
 @media (hover: hover) and (pointer: fine) {
   .ap-nav__link:hover {
-    color: #000000;
+    color: var(--ap-nav-hover);
   }
 }
 @media (min-width: 768px) {
@@ -602,6 +661,69 @@ html[data-scrolled] .ap-nav::before {
   transform: rotate(-45deg);
 }
 
+/* ---------- Bascule thème sombre / clair ---------- */
+/* Barre (≥ 768 px) : icône seule, cible 44 px. Menu mobile : ligne avec texte visible. */
+.ap-theme {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ap-text);
+  cursor: pointer;
+  transition:
+    color 100ms var(--ap-ease),
+    transform 100ms var(--ap-ease);
+}
+.ap-theme svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ap-theme:active {
+  transform: scale(0.97);
+}
+.ap-theme:focus-visible {
+  outline-offset: -3px;
+}
+.ap-theme--bar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .ap-theme--bar {
+    display: inline-grid;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-theme:hover {
+    color: var(--ap-link-c);
+  }
+}
+.ap-theme--row {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 52px;
+  margin: 1.5rem 0 0;
+  padding-inline: 18px;
+  font: 400 1.0625rem/1.2 var(--ap-font);
+  color: var(--ap-link-c);
+}
+.ap-theme--row svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* ---------- Menu mobile plein écran (blanc) ---------- */
 .ap-sheet {
   box-sizing: border-box;
@@ -618,22 +740,22 @@ html[data-scrolled] .ap-nav::before {
   color: var(--ap-text);
   opacity: 0;
   transform: translateY(24px);
-  /* Fermeture : 200 ms. */
+  /* Fermeture : 150 ms. */
   transition:
-    opacity 200ms var(--ap-ease),
-    transform 200ms var(--ap-ease),
-    overlay 200ms allow-discrete,
-    display 200ms allow-discrete;
+    opacity 150ms var(--ap-ease),
+    transform 150ms var(--ap-ease),
+    overlay 150ms allow-discrete,
+    display 150ms allow-discrete;
 }
-/* Ouverture type feuille : 350 ms, courbe de tiroir sans rebond. */
+/* Ouverture type feuille : 260 ms, courbe de tiroir sans rebond. */
 .ap-sheet[open] {
   opacity: 1;
   transform: none;
   transition:
-    opacity 250ms var(--ap-ease-sheet),
-    transform 350ms var(--ap-ease-sheet),
-    overlay 350ms allow-discrete,
-    display 350ms allow-discrete;
+    opacity 180ms var(--ap-ease-sheet),
+    transform 260ms var(--ap-ease-sheet),
+    overlay 260ms allow-discrete,
+    display 260ms allow-discrete;
 }
 @starting-style {
   .ap-sheet[open] {
@@ -641,13 +763,13 @@ html[data-scrolled] .ap-nav::before {
     transform: translateY(24px);
   }
 }
-/* Les liens arrivent en cascade de 30 ms (ouverture seulement). */
+/* Les liens arrivent en cascade de 30 ms, départ à 30 ms (ouverture seulement). */
 .ap-sheet[open] .ap-sheet__link {
   opacity: 1;
   transform: none;
   transition:
-    opacity 300ms var(--ap-ease-sheet) calc(60ms + var(--i, 0) * 30ms),
-    transform 350ms var(--ap-ease-sheet) calc(60ms + var(--i, 0) * 30ms);
+    opacity 200ms var(--ap-ease-sheet) calc(30ms + var(--i, 0) * 30ms),
+    transform 240ms var(--ap-ease-sheet) calc(30ms + var(--i, 0) * 30ms);
 }
 @starting-style {
   .ap-sheet[open] .ap-sheet__link {
@@ -795,8 +917,8 @@ html[data-scrolled] .ap-nav::before {
   color: var(--ap-link-c);
   font: 400 1.0625rem/1.1 var(--ap-font);
   transition:
-    background-color 150ms var(--ap-ease),
-    color 150ms var(--ap-ease),
+    background-color 100ms var(--ap-ease),
+    color 100ms var(--ap-ease),
     transform 100ms var(--ap-ease);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -854,7 +976,7 @@ html[data-scrolled] .ap-nav::before {
   grid-template-columns: minmax(0, 1fr);
   gap: 0.5rem 2rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgb(0 0 0 / 0.12);
+  border-bottom: 1px solid var(--ap-hair);
 }
 @media (min-width: 640px) {
   .ap-footer__cols {
@@ -913,6 +1035,7 @@ html[data-scrolled] .ap-nav::before {
   .ap-pill,
   .ap-pill-outline,
   .ap-nav__menu,
+  .ap-theme,
   .ap-sheet__close,
   .ap-contact__copy .btn {
     transition-property: background-color, border-color, color;
@@ -920,6 +1043,7 @@ html[data-scrolled] .ap-nav::before {
   .ap-pill:active,
   .ap-pill-outline:active,
   .ap-nav__menu:active,
+  .ap-theme:active,
   .ap-sheet__close:active {
     transform: none;
   }

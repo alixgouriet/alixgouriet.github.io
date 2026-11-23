@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
 import { MobileSheet } from './MobileSheet.tsx'
 import { NAV } from './nav.ts'
+import { ThemeToggle } from './ThemeToggle.tsx'
 
 /** Place le trait sous le lien actif (translateX + scaleX). Lecture de mise en page : une fois par changement de page ou de taille. */
 function placeIndicator(nav: HTMLElement, ind: HTMLElement) {
@@ -55,6 +56,7 @@ export function Header() {
               </NavLink>
             ))}
           </nav>
+          <ThemeToggle />
           <button
             type="button"
             className="ap-nav__menu"

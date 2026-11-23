@@ -1,6 +1,7 @@
 import { useEffect, type CSSProperties, type RefObject } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
 import { NAV } from './nav.ts'
+import { ThemeToggle } from './ThemeToggle.tsx'
 
 export function MobileSheet({ dialogRef }: { dialogRef: RefObject<HTMLDialogElement | null> }) {
   const { pathname } = useLocation()
@@ -53,6 +54,7 @@ export function MobileSheet({ dialogRef }: { dialogRef: RefObject<HTMLDialogElem
             {item.label}
           </NavLink>
         ))}
+        <ThemeToggle variant="row" />
       </nav>
     </dialog>
   )
