@@ -5,6 +5,6 @@ export const contact: Contact = {
   phone: '06 49 51 66 57',
   phoneHref: 'tel:+33649516657',
   city: 'Niort',
-  linkedin: null,
+  linkedin: 'https://www.linkedin.com/in/alix-gouriet-05381b23a/',
   cvHref: '/cv-alix-gouriet.pdf',
 }

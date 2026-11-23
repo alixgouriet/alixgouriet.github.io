@@ -90,8 +90,9 @@ describe('données', () => {
     expect(text).not.toContain('déployée en production')
   })
 
-  it('le LinkedIn est absent tant que non fourni', () => {
-    expect(contact.linkedin).toBeNull()
+  it('le LinkedIn est fourni par Alix (https, profil /in/)', () => {
+    expect(contact.linkedin).toBe('https://www.linkedin.com/in/alix-gouriet-05381b23a/')
+    expect(contact.linkedin).toMatch(/^https:\/\/www\.linkedin\.com\/in\//)
     expect(contact.cvHref).toBe('/cv-alix-gouriet.pdf')
   })
 })

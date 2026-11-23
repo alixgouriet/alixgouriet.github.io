@@ -108,3 +108,16 @@ test("copie de l'e-mail : presse-papiers refusé, pas d'erreur", async ({ page }
   await expect(page.locator(COPY_STATUS)).not.toHaveText('E-mail copié')
   await expect(page.locator(COPY_STATUS)).toHaveText(/Copie impossible/)
 })
+
+test('LinkedIn : lien https vers le profil, rel noopener noreferrer, présent sur /contact et dans le pied de page', async ({ page }) => {
+  for (const path of ['/contact', '/']) {
+    await page.goto(path)
+    await page.waitForLoadState('networkidle')
+    const link = page.getByRole('link', { name: /profil LinkedIn/i })
+    await expect(link).toHaveCount(1)
+    await expect(link).toHaveAttribute('href', 'https://www.linkedin.com/in/alix-gouriet-05381b23a/')
+    const rel = (await link.getAttribute('rel')) ?? ''
+    expect(rel).toContain('noopener')
+    expect(rel).toContain('noreferrer')
+  }
+})
