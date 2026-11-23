@@ -1,3 +1,6 @@
+import type { CSSProperties } from 'react'
+import { stepStart } from '../components/fx/sceneEngine.ts'
+
 /** Schéma entité-association de GreenSD, dessiné à la main d'après les clés du script SQL. */
 
 interface Box {
@@ -117,10 +120,34 @@ function path(from: Box, to: Box): string {
   return `M${x1} ${y1}V${mid}H${to.x + W / 2}V${y2}`
 }
 
+/**
+ * Étape d'apparition de chaque table dans la scène de l'accueil (scenes.ts, GREENSD_STEPS). Un lien apparaît avec
+ * la plus tardive de ses deux tables. Hors scène (fiche), ces valeurs ne sont pas utilisées.
+ */
+const STAGE: Record<Key, number> = {
+  partenaire: 0,
+  entree: 0,
+  typeVehicule: 1,
+  vehicule: 1,
+  coefficient: 1,
+  livreur: 2,
+  tournee: 2,
+  client: 3,
+  livraison: 3,
+  approvisionner: 4,
+}
+const KEYS = Object.keys(content) as Key[]
+const keyOf = (b: Box) => KEYS.find((k) => content[k].name === b.name) as Key
+
 const LABEL =
   "Schéma de la base GreenSD : 10 tables reliées par clés étrangères. entree dépend de partenaire ; approvisionner relie entree et tournee_ ; tournee_ dépend de livreur et de vehicule ; livraison dépend de client et de tournee_ ; vehicule et coefficientCO2 dépendent de type_vehicule."
 
-function Diagram({ layout }: { layout: Layout }) {
+/** Début d'apparition (--k) d'un élément de la scène ; rien hors scène. */
+function at(steps: number | undefined, stage: number): CSSProperties | undefined {
+  return steps ? ({ '--k': stepStart(stage, steps) } as CSSProperties) : undefined
+}
+
+function Diagram({ layout, steps }: { layout: Layout; steps?: number }) {
   const boxes = boxesOf(layout)
   const list = Object.values(boxes)
   const width = Math.max(...list.map((b) => b.x)) + W + 10
@@ -134,10 +161,16 @@ function Diagram({ layout }: { layout: Layout }) {
         </marker>
       </defs>
       {links.map(([a, b]) => (
-        <path key={`${a}-${b}`} className="er-link" d={path(boxes[a], boxes[b])} markerEnd={`url(#${arrow})`} />
+        <path
+          key={`${a}-${b}`}
+          className={steps ? 'er-link er-st' : 'er-link'}
+          style={at(steps, Math.max(STAGE[a], STAGE[b]))}
+          d={path(boxes[a], boxes[b])}
+          markerEnd={`url(#${arrow})`}
+        />
       ))}
       {list.map((b) => (
-        <g key={b.name} aria-hidden="true">
+        <g key={b.name} aria-hidden="true" className={steps ? 'er-st' : undefined} style={at(steps, STAGE[keyOf(b)])}>
           <rect className="er-box" x={b.x} y={b.y} width={W} height={H} />
           <rect className="er-head" x={b.x} y={b.y} width={W} height="24" />
           <text className="er-title" x={b.x + 8} y={b.y + 17}>
@@ -158,12 +191,12 @@ function Diagram({ layout }: { layout: Layout }) {
  * Deux mises en page du même schéma, une seule visible (requête de conteneur CSS) : large si le cadre
  * fait au moins 520 px, haute en dessous, pour que toutes les tables restent lisibles sans défilement.
  */
-export function ErDiagram({ caption = true }: { caption?: boolean }) {
+export function ErDiagram({ caption = true, steps }: { caption?: boolean; steps?: number }) {
   return (
     <figure className="er">
       <div className="er-frame">
-        <Diagram layout={WIDE} />
-        <Diagram layout={TALL} />
+        <Diagram layout={WIDE} steps={steps} />
+        <Diagram layout={TALL} steps={steps} />
       </div>
       {caption && (
         <figcaption>

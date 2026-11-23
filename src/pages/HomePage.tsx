@@ -42,7 +42,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="ap-section ap-section--white home-projects" aria-label="Projets">
+      <section id="projets" className="ap-section ap-section--white home-projects" aria-label="Projets">
         <div className="ap-container ap-container--wide ap-center">
           {/* À VALIDER PAR ALIX : accroche de l'accueil (src/data/copy.ts). */}
           <p className="ap-title-lg home-lede">{ACCROCHE}</p>

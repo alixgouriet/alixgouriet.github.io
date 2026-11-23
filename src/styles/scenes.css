@@ -1,0 +1,373 @@
+/*
+ * scenes.css : scènes « histoire » épinglées de l'accueil (moteur : src/components/fx/sceneEngine.ts) + barre locale.
+ *
+ * Principe : la scène est une section haute ; son `.scene-stage` est en `position: sticky` (100svh). Le défilement est
+ * natif, jamais retenu. Le moteur écrit la progression 0 → 1 dans `--p` sur la section ; tout le reste est du CSS
+ * (`calc()` + `clamp()`), sur `transform` et `opacity` seulement.
+ *
+ * Deux régimes :
+ *  1. Flux normal (défaut : < 1024 px de large, < 700 px de haut, reduced-motion) : colonne titre, visuel complet,
+ *     liste d'étapes entièrement visible. Aucune épingle, aucun mouvement propre à la scène (révélation simple : data-fx).
+ *  2. Épinglé (@media PINNED ci-dessous, même condition que PINNED_QUERY du moteur) : hauteur (200 + 24 × étapes) svh.
+ *     Sans JS, `--p` vaut 1 : tout est à l'état final.
+ *
+ * Variables par élément : `--k` = progression (0 → 1) où l'élément commence à apparaître ; `--w` = durée de l'apparition
+ * (0,07 par défaut) ; `--r` = avancement de l'élément (0 → 1) ; `--i` / `--n` = rang de l'étape et nombre d'étapes.
+ */
+
+/* ---------- Régime 1 : flux normal ---------- */
+.scene.home-tile {
+  min-height: 0;
+}
+.scene-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+.scene-head {
+  text-align: center;
+}
+.scene-result {
+  margin: 0.75rem auto 0;
+  max-width: 26em;
+}
+.scene-body {
+  display: grid;
+  justify-items: center;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  width: 100%;
+  margin-top: clamp(1.5rem, 3.5vw, 2.5rem);
+}
+.scene-media {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+.scene-reveal {
+  width: min(100%, 760px);
+  text-align: left;
+}
+.scene-reveal > * {
+  width: 100%;
+}
+.scene-side {
+  width: min(100%, 34rem);
+  text-align: left;
+}
+.scene-legend {
+  position: relative;
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scene-step__label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.scene-step__text {
+  display: block;
+  font-size: 1.0625rem;
+  line-height: 1.4;
+}
+.scene-more {
+  margin: 1.25rem 0 0;
+}
+.scene .home-more-link {
+  scroll-margin-top: calc(var(--ap-nav-h) + 44px + 24px);
+}
+/* Le tracé « recouvrement » de effects.css ne s'applique pas à une scène haute. */
+.scene.home-tile {
+  animation: none;
+}
+
+/* Visuels propres aux scènes */
+.segments li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.segments__tag {
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ap-fg);
+}
+.scene .chain-fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--ap-link-c) 28%, transparent);
+}
+.scene .chain li {
+  isolation: isolate;
+}
+
+/* ---------- Barre locale (accueil, ≥ 768 px) ---------- */
+.ap-local {
+  display: none;
+}
+@media (min-width: 768px) {
+  .ap-local {
+    display: block;
+    position: fixed;
+    z-index: 49;
+    top: var(--ap-nav-h);
+    inset-inline: 0;
+    height: 44px;
+    /* Fond opaque : aucun backdrop-filter supplémentaire (un seul sur tout le site : la barre principale). */
+    background: var(--ap-bg-gray);
+    box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.08);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+      opacity 180ms var(--ap-ease-out),
+      transform 180ms var(--ap-ease-out),
+      visibility 0s linear 180ms;
+  }
+  .ap-local[data-shown] {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s;
+  }
+  html[data-local] {
+    scroll-padding-top: calc(var(--ap-nav-h) + 44px + 16px);
+  }
+}
+.ap-local__inner {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: min(100%, 1024px);
+  margin-inline: auto;
+  padding-inline: var(--ap-gutter);
+}
+.ap-local__name {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ap-text);
+  text-decoration: none;
+}
+.ap-local__links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.ap-local__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.75rem;
+  color: var(--ap-nav-ink);
+  text-decoration: none;
+  transition: color 150ms var(--ap-ease);
+}
+.ap-local__pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding-inline: 14px;
+  border-radius: var(--ap-pill-radius);
+  background: var(--ap-btn);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-decoration: none;
+  transition:
+    background-color 150ms var(--ap-ease),
+    transform 100ms var(--ap-ease);
+}
+/* Zone de toucher de 44 px autour de la pilule de 30 px. */
+.ap-local__pill::after {
+  content: '';
+  position: absolute;
+  inset: -7px -4px;
+}
+.ap-local__pill:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-local__link:hover {
+    color: #000000;
+  }
+  .ap-local__pill:hover {
+    background: var(--ap-btn-hover);
+  }
+}
+.ap-local a:focus-visible {
+  outline-offset: -3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ap-local {
+    transform: none;
+    transition-duration: 120ms, 0s, 0s;
+  }
+  .ap-local__pill:active {
+    transform: none;
+  }
+}
+
+/* ---------- Régime 2 : scène épinglée ---------- */
+@media (min-width: 1024px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+  .scene {
+    /* Valeur par défaut = état final (sans JS). Le moteur l'écrase en ligne pendant que la scène est visible. */
+    --p: 1;
+  }
+  .scene.home-tile {
+    height: calc(200svh + var(--n) * 24svh);
+    padding: 0;
+    justify-content: flex-start;
+    /* `clip` et `hidden` n'empêcheraient pas le sticky, mais inutile ici : le stage reste dans la section. */
+    overflow: visible;
+  }
+  .scene-stage {
+    position: sticky;
+    top: 0;
+    box-sizing: border-box;
+    height: 100svh;
+    /* Barre principale (44) + barre locale (44) + respiration : rien ne passe dessous. */
+    padding: calc(var(--ap-nav-h) + 44px + 20px) var(--ap-gutter) 28px;
+    overflow: clip;
+    border-radius: inherit;
+  }
+  .scene-title {
+    font-size: clamp(2rem, 3.4vw, 2.75rem);
+  }
+  .scene-result {
+    margin-top: 0.5rem;
+    font-size: clamp(1.0625rem, 1.6vw, 1.375rem);
+  }
+  .scene-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: min(100%, 1180px);
+    margin-top: 0.5rem;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    align-items: center;
+    justify-items: stretch;
+    gap: clamp(2rem, 4vw, 3.5rem);
+  }
+  .scene-media {
+    --z: clamp(0, calc(var(--p) / 0.12), 1);
+    align-items: center;
+    height: 100%;
+    /* Entrée du média : il monte de 24 px et passe de 0,94 à 1 pendant les 12 premiers % de la scène. */
+    transform: translateY(calc((1 - var(--z)) * 24px)) scale(calc(0.94 + 0.06 * var(--z)));
+  }
+  .scene-reveal {
+    width: 100%;
+  }
+  /* La révélation simple (data-fx) est remplacée par le moteur : aucun doublon d'animation. */
+  .scene [data-fx][data-fx] {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+  .scene .er-svg {
+    max-height: calc(100svh - 17rem);
+  }
+  .scene .chain {
+    gap: 0 2rem;
+  }
+  .scene .chain li {
+    padding: 1.75rem 0.25rem;
+    font-size: clamp(1rem, 1.45vw, 1.3rem);
+  }
+  .scene .segments {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+  }
+  .scene .segments li {
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    font-size: clamp(1.0625rem, 1.7vw, 1.4rem);
+  }
+  .scene-legend {
+    padding-left: 1.25rem;
+    gap: 1rem;
+  }
+  /* Rail de progression : trait fixe + trait qui se remplit (scaleY). */
+  .scene-legend::before,
+  .scene-legend::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    border-radius: 1px;
+    background: color-mix(in srgb, var(--ap-fg) 22%, transparent);
+  }
+  .scene-legend::after {
+    background: var(--ap-link-c);
+    transform-origin: 50% 0;
+    transform: scaleY(var(--p));
+  }
+
+  /* Étapes de la légende : l'étape active monte à 1, les autres restent lisibles (plancher 0,65 : AA sur noir et sur gris). */
+  .scene-step {
+    --s: calc(var(--p) * var(--n));
+    --in: clamp(0.65, calc(0.65 + (var(--s) - var(--i) + 0.15) * 2.3333), 1);
+    --out: clamp(0.65, calc(1 - (var(--s) - var(--i) - 0.85) * 2.3333), 1);
+    opacity: min(var(--in), var(--out));
+  }
+  .scene-step:last-child {
+    --out: 1;
+  }
+
+  /* Éléments qui se construisent avec la progression. */
+  .er-st,
+  .chain-st,
+  .chain-fill,
+  .seg-st,
+  .bar-st {
+    --r: clamp(0, calc((var(--p) - var(--k)) / var(--w, 0.07)), 1);
+  }
+  .er-st,
+  .seg-st {
+    opacity: var(--r);
+    transform: translateY(calc((1 - var(--r)) * 14px));
+  }
+  .chain-st {
+    /* « S'allume » : de 0,5 (éteint, 5:1 sur noir) à 1. */
+    opacity: calc(0.5 + 0.5 * var(--r));
+  }
+  .chain-fill {
+    opacity: var(--r);
+  }
+  .bar-st {
+    transform: scaleX(var(--r));
+  }
+
+  /* will-change : posé seulement pendant que la scène est à l'écran (data-active, posé par le moteur). */
+  .scene[data-active] .scene-media,
+  .scene[data-active] .scene-legend::after,
+  .scene[data-active] .seg-st,
+  .scene[data-active] .bar-st {
+    will-change: transform, opacity;
+  }
+  .scene[data-active] .scene-step,
+  .scene[data-active] .chain-st,
+  .scene[data-active] .chain-fill {
+    will-change: opacity;
+  }
+}

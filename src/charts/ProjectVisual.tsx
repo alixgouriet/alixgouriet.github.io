@@ -17,15 +17,15 @@ const VISUALS: Record<string, ComponentType> = {
  * Le visuel est toujours dans le DOM. Par défaut (fiche), il se dessine au défilement (data-fx).
  * Avec `plain` (accueil), aucun effet : l'entrée est gérée par la classe .ap-reveal du conteneur.
  */
-export function ProjectVisual({ slug, plain = false }: { slug: string; plain?: boolean }) {
+export function ProjectVisual({ slug, plain = false, steps }: { slug: string; plain?: boolean; steps?: number }) {
   const Visual = VISUALS[slug]
   if (!Visual) return null
   if (plain) {
     // Accueil : pas de légende (elle reste sur la fiche) ; le nom accessible est porté par le visuel lui-même.
-    if (slug === 'prix-immobiliers-niortais') return <SegmentsVisual />
-    if (slug === 'villes-natalistes') return <GrowthBars animate={false} caption={false} />
-    if (slug === 'greensd') return <ErDiagram caption={false} />
-    if (slug === 'educheck') return <ChainVisual caption={false} />
+    if (slug === 'prix-immobiliers-niortais') return <SegmentsVisual steps={steps} />
+    if (slug === 'villes-natalistes') return <GrowthBars animate={false} caption={false} steps={steps} />
+    if (slug === 'greensd') return <ErDiagram caption={false} steps={steps} />
+    if (slug === 'educheck') return <ChainVisual caption={false} steps={steps} />
     return <Visual />
   }
   const bars = slug === 'villes-natalistes'

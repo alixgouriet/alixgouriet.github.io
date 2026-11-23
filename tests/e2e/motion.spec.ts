@@ -105,6 +105,9 @@ test.describe('mouvement actif : état final lisible', () => {
             if (r.height === 0 || c < vh * 0.4 || c > vh * 0.6) continue
             // Le texte du hero s'estompe volontairement à 0,4 avec le défilement (MOUVEMENT.md) : on ne le teste qu'en haut de page.
             if (window.scrollY > 4 && el.closest('.home-hero__text')) continue
+            // Scènes épinglées de l'accueil (MOUVEMENT.md) : les étapes inactives sont à 0,65 (jamais cachées ; plancher vérifié
+            // dans scenes.spec.ts) et les éléments du visuel se construisent avec la progression (opacité 0 → 1) : ce n'est pas du texte à l'état final.
+            if (el.closest('.scene-step, .er-st, .chain-st, .seg-st, .bar-st')) continue
             let eff = 1
             const bads: string[] = []
             for (let n: HTMLElement | null = el; n && n !== document.documentElement; n = n.parentElement) {

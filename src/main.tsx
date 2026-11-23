@@ -7,6 +7,7 @@ import './styles/index.css'
 import './styles/effects.css'
 import './styles/apple-base.css'
 import './styles/home.css'
+import './styles/scenes.css'
 import './styles/pages.css'
 import { router } from './routes.tsx'
 
