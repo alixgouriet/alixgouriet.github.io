@@ -23,8 +23,10 @@ for (const route of ALL_ROUTES) {
   })
 
   test(`axe WCAG 2 A/AA : ${route}`, async ({ page }, info) => {
+    // L'entrée des tuiles est liée au défilement (opacité < 1 hors écran) : on teste l'état final, comme avec prefers-reduced-motion.
+    await page.emulateMedia({ reducedMotion: 'reduce' })
     await load(page, route)
-    await page.waitForTimeout(1500)
+    await page.waitForTimeout(500)
     const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
     const summary = res.violations.map(
       (v) => `${v.id} (${v.impact}) x${v.nodes.length}: ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`,
@@ -53,4 +55,50 @@ test("clavier : indicateur de focus visible sur l'en-tête", async ({ page }, in
     return { style: s.outlineStyle, shadow: s.boxShadow }
   })
   expect(o.style !== 'none' || o.shadow !== 'none').toBe(true)
+})
+
+test('repères : banner, un seul main, navigation principale (barre + menu), contentinfo, h1 unique', async ({ page }) => {
+  for (const route of ALL_ROUTES) {
+    await load(page, route)
+    await expect(page.locator('header.ap-nav'), route).toHaveCount(1)
+    await expect(page.getByRole('banner'), route).toHaveCount(1)
+    await expect(page.locator('main#contenu'), route).toHaveCount(1)
+    await expect(page.locator('nav[aria-label="Accès rapide"]'), route).toHaveCount(0) // supprimé
+    await expect(page.locator('nav[aria-label="Principal"]'), route).toHaveCount(1) // une seule nav « Principal » (barre)
+    await expect(page.locator('nav[aria-label="Menu mobile"]'), route).toHaveCount(1) // feuille mobile, nommée différemment
+    await expect(page.locator('h1'), route).toHaveCount(1)
+    // SiteFooter : présent partout, hors de main (réduit à la navigation sur /contact).
+    await expect(page.locator('footer.ap-footer'), route).toHaveCount(1)
+    await expect(page.locator('main footer'), route).toHaveCount(0)
+    await expect(page.getByRole('contentinfo'), route).toHaveCount(1)
+  }
+})
+
+test("accueil : le h1 « Alix Gouriet » est dans main et les sections portent un nom", async ({ page }) => {
+  await load(page, '/')
+  await expect(page.locator('main h1')).toHaveText(/Alix\s*Gouriet/)
+  await expect(page.locator('main section[aria-labelledby="accueil-titre"]')).toHaveCount(1)
+  await expect(page.locator('main section[aria-label="Projets"]')).toHaveCount(1)
+  for (const name of ['Autres réalisations', 'Compétences', 'À propos'])
+    await expect(page.getByRole('region', { name, exact: true }), name).toHaveCount(1)
+})
+
+test('mouvement réduit : tout le contenu est visible, sans transformation résiduelle ni animation active', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const route of ['/', '/projets', '/competences', '/a-propos']) {
+    await load(page, route)
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForTimeout(300)
+    const bad = await page.evaluate(() => {
+      const out: string[] = []
+      for (const el of document.querySelectorAll<HTMLElement>('.ap-reveal')) {
+        const cs = getComputedStyle(el)
+        if (cs.opacity !== '1' || (cs.transform !== 'none' && cs.transform !== 'matrix(1, 0, 0, 1, 0, 0)')) out.push(`${el.className} opacity=${cs.opacity} transform=${cs.transform}`)
+      }
+      const running = document.getAnimations().filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
+      if (running.length) out.push(`${running.length} animation(s) infinie(s) en cours`)
+      return out
+    })
+    expect(bad, route).toEqual([])
+  }
 })

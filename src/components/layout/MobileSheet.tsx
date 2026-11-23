@@ -1,4 +1,4 @@
-import { useEffect, type CSSProperties, type RefObject } from 'react'
+import { useEffect, type RefObject } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
 import { NAV } from './nav.ts'
 
@@ -24,29 +24,29 @@ export function MobileSheet({ dialogRef }: { dialogRef: RefObject<HTMLDialogElem
   return (
     <dialog
       ref={dialogRef}
-      className="sheet on-ink"
+      className="ap-sheet"
       aria-label="Menu"
       onClose={() => document.documentElement.classList.remove('sheet-open')}
       onClick={(e) => {
         if (e.target === e.currentTarget) close()
       }}
     >
-      <div className="sheet-bar">
-        <Link to="/" className="brand" onClick={close}>
+      <div className="ap-sheet__bar">
+        <Link to="/" className="ap-nav__brand" onClick={close}>
           Alix Gouriet
         </Link>
-        <button type="button" className="sheet-close" onClick={close}>
-          Fermer
+        <button type="button" className="ap-sheet__close" aria-label="Fermer" onClick={close}>
+          <span className="ap-sheet__close-icon" aria-hidden="true" />
         </button>
       </div>
-      <nav className="sheet-nav" aria-label="Principal">
-        {NAV.map((item, i) => (
+      <nav className="ap-sheet__nav" aria-label="Menu mobile">
+        {NAV.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
-            className="sheet-link"
-            style={{ '--i': i } as CSSProperties}
+            className="ap-sheet__link"
+            viewTransition
             onClick={close}
           >
             {item.label}

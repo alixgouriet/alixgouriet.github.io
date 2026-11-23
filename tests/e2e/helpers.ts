@@ -15,6 +15,11 @@ export const FICHES = [
 ]
 export const ALL_ROUTES = [...PAGES.map((p) => p.path), ...FICHES, '/projets/xyz']
 
+/** Nom accessible du bouton de copie : « Copier » visible + « l'e-mail » en sr-only. */
+export const COPY_BUTTON_NAME = /^Copier\s+l['’]e-mail$/
+/** Zone de confirmation de la copie (role=status, présente dans le DOM même vide). */
+export const COPY_STATUS = '.copy-status[role="status"]'
+
 /** Écoute console (erreurs + avertissements), erreurs de page et requêtes en échec. */
 export function watchConsole(page: Page) {
   const issues: string[] = []
@@ -35,13 +40,19 @@ export async function load(page: Page, path: string) {
   await expect(page.locator('main h1')).toBeVisible()
 }
 
-/** Navigue par l'interface (menu mobile si le bouton Menu est visible, sinon en-tête). */
+/** Nom accessible du bouton Menu (icône seule, aria-label) : visible sous 768 px uniquement. */
+export const MENU_BUTTON = { name: 'Menu', exact: true } as const
+/** Les 5 libellés de navigation, dans l'ordre (barre, menu, pied de page). */
+export const NAV_LABELS = ['Accueil', 'À propos', 'Compétences', 'Projets', 'Contact']
+export const isNarrow = (page: Page) => (page.viewportSize()?.width ?? 1280) < 768
+
+/** Navigue par l'interface (menu mobile si le bouton Menu est visible, sinon barre fixe). */
 export async function navTo(page: Page, label: string) {
   const menu = page.getByRole('button', { name: 'Menu', exact: true })
   if (await menu.isVisible()) {
     await menu.click()
-    await page.locator('dialog.sheet').getByRole('link', { name: label, exact: true }).click()
+    await page.locator('dialog.ap-sheet').getByRole('link', { name: label, exact: true }).click()
   } else {
-    await page.locator('nav.nav-desktop').getByRole('link', { name: label, exact: true }).click()
+    await page.locator('nav.ap-nav__links').getByRole('link', { name: label, exact: true }).click()
   }
 }

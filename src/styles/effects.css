@@ -1,0 +1,106 @@
+/*
+ * Effets CSS. Règle d'or : l'état par défaut EST l'état final (contenu lisible sans JS,
+ * sans animation, avec reduced-motion). Les effets ne s'ajoutent que :
+ *  - sous @supports (animation-timeline: view()) : animations liées au défilement ;
+ *  - sinon, via useFx (IntersectionObserver) qui pose data-state="pending" puis "in".
+ * Seuls transform, opacity, clip-path et color sont animés. Jamais `transition: all`.
+ */
+
+@keyframes fx-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--fx-y));
+  }
+}
+@keyframes fx-draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes fx-bar {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes fx-lit {
+  from {
+    color: var(--off);
+  }
+  to {
+    color: var(--on);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ----- Chrome : animations liées au défilement ----- */
+  @supports (animation-timeline: view()) {
+    [data-fx='reveal'] {
+      animation: fx-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 55%;
+    }
+    [data-fx='draw'] {
+      animation: fx-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 70%;
+    }
+    [data-fx='bar'] {
+      animation: fx-bar linear both;
+      animation-timeline: view();
+      animation-range: entry 20% entry 80%;
+    }
+    /* Phrase : chaque mot s'éclaire quand il passe dans la moitié basse de l'écran (bureau seulement). */
+    @media (min-width: 768px) {
+      [data-fx='lit'] .w {
+        animation: fx-lit linear both;
+        animation-timeline: view();
+        animation-range: cover 18% cover 38%;
+      }
+    }
+  }
+
+  /* ----- Autres navigateurs : repli IntersectionObserver ----- */
+  @supports not (animation-timeline: view()) {
+    [data-fx] {
+      transition:
+        opacity 500ms var(--ease-out),
+        transform 500ms var(--ease-out),
+        clip-path 600ms var(--ease-out);
+    }
+    [data-fx='reveal'][data-state='pending'] {
+      opacity: 0;
+      transform: translateY(var(--fx-y));
+    }
+    [data-fx='draw'][data-state='pending'] {
+      clip-path: inset(0 100% 0 0);
+    }
+    [data-fx='draw'][data-state='in'] {
+      clip-path: inset(0 0 0 0);
+    }
+    [data-fx='bar'][data-state='pending'] {
+      transform: scaleX(0);
+    }
+    [data-fx='lit'] .w {
+      transition: color 500ms var(--ease-out);
+      transition-delay: calc(var(--i) * 40ms);
+    }
+    [data-fx='lit'][data-state='pending'] .w {
+      color: var(--off);
+    }
+  }
+}
+
+/* ----- Mouvement réduit : tout est à l'état final, sans transition ----- */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active {
+    transform: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}

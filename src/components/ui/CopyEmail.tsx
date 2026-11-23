@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 export function CopyEmail({ email }: { email: string }) {
   const [copied, setCopied] = useState(false)
+  const [failed, setFailed] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => () => clearTimeout(timer.current), [])
@@ -9,28 +10,26 @@ export function CopyEmail({ email }: { email: string }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(email)
+      setFailed(false)
       setCopied(true)
       clearTimeout(timer.current)
-      timer.current = setTimeout(() => setCopied(false), 2000)
+      timer.current = setTimeout(() => setCopied(false), 2500)
     } catch {
-      /* presse-papiers indisponible : l'adresse reste affichée et cliquable */
+      // Presse-papiers indisponible : l’adresse reste affichée et sélectionnable.
+      setCopied(false)
+      setFailed(true)
     }
   }
 
   return (
     <>
       <button type="button" className="btn btn-outline" onClick={copy}>
-        Copier l'e-mail
+        Copier
+        <span className="sr-only">&nbsp;l’e-mail</span>
       </button>
-      <span className="sr-only" aria-live="polite">
-        {copied ? 'E-mail copié.' : ''}
+      <span className="copy-status" role="status">
+        {copied ? 'E-mail copié' : failed ? 'Copie impossible : sélectionnez l’adresse.' : ''}
       </span>
-      {copied ? (
-        <span className="small muted" aria-hidden="true">
-          {' '}
-          E-mail copié
-        </span>
-      ) : null}
     </>
   )
 }

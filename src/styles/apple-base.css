@@ -1,0 +1,829 @@
+/*
+ * apple-base.css : socle « grammaire apple.fr » (v4). Chargé APRÈS index.css et effects.css : il gagne à spécificité égale.
+ * CONTRAT POUR LES PAGES (ne pas redéfinir ces classes ailleurs ; surcharger par une classe de page) :
+ *
+ * Mise en page
+ *  .ap-container            colonne centrée ~980 px, marges 20 px (22 px dès 768). Variantes --wide (1260 px), --narrow (692 px).
+ *  .ap-section              bande pleine largeur, espacement vertical fluide. Variantes --white | --gray | --dark (fond + texte + liens adaptés).
+ *  .ap-tile                 tuile arrondie 28 px (18 px mobile), contenu centré en colonne. Variantes --gray | --white | --dark ;
+ *                           --tall (hauteur mini ~ 640 px), --bleed (sans marge basse, pour un visuel collé en bas), --span (2 colonnes dans .ap-tile-grid).
+ *  .ap-tile-grid            grille 2 colonnes, écart 12 px (20 px sur mobile), 1 colonne sous 768 px.
+ *
+ * Typographie
+ *  .ap-title-xl             titre géant (hero) clamp(3rem, 8vw, 5.5rem), 600, tracking -0.015em.
+ *  .ap-title-lg             titre de tuile clamp(2rem, 4.5vw, 3.5rem), 600, tracking -0.012em.
+ *  .ap-title-md             titre de carte clamp(1.5rem, 2.8vw, 2rem), 600, tracking -0.005em.
+ *  .ap-subtitle             sous-titre clamp(1.25rem, 2.2vw, 1.75rem), 400, interligne 1.2.
+ *  .ap-eyebrow              petite légende 14 px, 600, couleur secondaire (pas de capitales).
+ *  .ap-muted                couleur de texte secondaire (adaptée au fond clair ou sombre).
+ *  .ap-center               text-align: center.
+ *
+ * Boutons et liens
+ *  .ap-pill                 bouton pilule plein bleu (a ou button), texte blanc, hauteur 44 px.
+ *  .ap-pill-outline         bouton pilule à contour (bleu sur clair, bleu clair sur sombre).
+ *  .ap-link-more            lien « texte › » bleu, sans soulignement (souligné au survol).
+ *
+ * Mouvement
+ *  .ap-reveal               état final par défaut ; entrée CSS (opacité + translateY + scale) liée au défilement
+ *                           via animation-timeline: view() sous @supports ; aucun mouvement si reduced-motion. Pas de JS.
+ *
+ * Variables (--ap-*) : voir le bloc :root ci-dessous. En surface sombre (.ap-section--dark, .ap-tile--dark, .ap-dark)
+ * --ap-fg, --ap-fg-2, --ap-link-c, --ap-on-link et --ap-focus sont redéfinis : utilisez-les pour rester lisible sur les deux fonds.
+ * Composants de la structure (barre, menu, bandeau, pied de page, page contact) : préfixes .ap-nav, .ap-sheet, .ap-promo, .ap-footer, .ap-contact.
+ */
+
+:root {
+  /* Couleurs */
+  --ap-text: #1d1d1f;
+  --ap-text-2: #6e6e73;
+  --ap-text-dark: #f5f5f7;
+  --ap-text-2-dark: #a1a1a6;
+  --ap-bg: #ffffff;
+  --ap-bg-gray: #f5f5f7;
+  --ap-bg-dark: #000000;
+  --ap-link: #0066cc;
+  --ap-link-dark: #2997ff;
+  --ap-btn: #0071e3;
+  /* Survol : #0077ed (doc) donnait 4,32:1 avec du blanc, sous AA ; on assombrit plutôt qu'on n'éclaircit (5,57:1). */
+  --ap-btn-hover: #0066cc;
+  --ap-nav-ink: #424245;
+
+  /* Rôles adaptés au fond courant (redéfinis en surface sombre) */
+  --ap-fg: var(--ap-text);
+  --ap-fg-2: var(--ap-text-2);
+  /* Petits textes gris (12-14 px) : #5f5f64, 5,83:1 sur #f5f5f7 (le #6e6e73 donne 4,66). */
+  --ap-fg-3: #5f5f64;
+  --ap-link-c: var(--ap-link);
+  --ap-on-link: #ffffff;
+  --ap-focus: var(--ap-btn);
+
+  /* Formes et rythme */
+  --ap-radius: 28px;
+  --ap-radius-sm: 18px;
+  --ap-pill-radius: 980px;
+  --ap-gap: 12px;
+  --ap-gutter: 20px;
+  --ap-nav-h: 48px;
+  --ap-promo-h: 52px;
+
+  /* Typographie */
+  --ap-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter Variable', 'Helvetica Neue', Arial, sans-serif;
+  --ap-fs-xl: clamp(3rem, 8vw, 5.5rem);
+  --ap-fs-lg: clamp(2rem, 4.5vw, 3.5rem);
+  --ap-fs-md: clamp(1.5rem, 2.8vw, 2rem);
+  --ap-fs-sub: clamp(1.25rem, 2.2vw, 1.75rem);
+  --ap-ls-xl: -0.015em;
+  --ap-ls-lg: -0.012em;
+  --ap-ls-md: -0.005em;
+
+  /* Mouvement */
+  --ap-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* L'ancien CSS lit --header-h pour ses décalages (sticky, padding) : on l'aligne sur la barre. */
+  --header-h: var(--ap-nav-h);
+}
+@media (min-width: 768px) {
+  :root {
+    --ap-nav-h: 44px;
+    --ap-gutter: 22px;
+  }
+}
+@media (max-width: 767px) {
+  :root {
+    --ap-radius: 18px;
+    --ap-gap: 20px;
+  }
+}
+
+.ap-dark,
+.ap-section--dark,
+.ap-tile--dark {
+  --ap-fg: var(--ap-text-dark);
+  --ap-fg-2: var(--ap-text-2-dark);
+  --ap-fg-3: var(--ap-text-2-dark);
+  --ap-link-c: var(--ap-link-dark);
+  --ap-on-link: #000000;
+  --ap-focus: var(--ap-link-dark);
+  color: var(--ap-fg);
+}
+
+/* ---------- Base ---------- */
+html {
+  scroll-padding-top: calc(var(--ap-nav-h) + 16px);
+}
+html.sheet-open {
+  overflow: hidden;
+}
+body {
+  background: var(--ap-bg);
+  color: var(--ap-text);
+  font-family: var(--ap-font);
+  font-size: 1.0625rem;
+  line-height: 1.47;
+  font-optical-sizing: auto;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+:focus-visible {
+  outline: 3px solid var(--ap-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Mise en page ---------- */
+.ap-container {
+  width: min(100% - 2 * var(--ap-gutter), 980px);
+  margin-inline: auto;
+}
+.ap-container--wide {
+  width: min(100% - 2 * var(--ap-gutter), 1260px);
+}
+.ap-container--narrow {
+  width: min(100% - 2 * var(--ap-gutter), 692px);
+}
+
+.ap-section {
+  padding-block: clamp(3.5rem, 8vw, 6.5rem);
+  background: var(--ap-bg);
+  color: var(--ap-fg);
+}
+.ap-section--white {
+  background: var(--ap-bg);
+}
+.ap-section--gray {
+  background: var(--ap-bg-gray);
+}
+.ap-section--dark {
+  background: var(--ap-bg-dark);
+}
+
+.ap-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 4vw, 3rem);
+  border-radius: var(--ap-radius);
+  overflow: hidden;
+  text-align: center;
+  background: var(--ap-bg-gray);
+  color: var(--ap-fg);
+}
+.ap-tile--gray {
+  background: var(--ap-bg-gray);
+}
+.ap-tile--white {
+  background: var(--ap-bg);
+}
+.ap-tile--dark {
+  background: var(--ap-bg-dark);
+}
+.ap-tile--tall {
+  min-height: clamp(30rem, 62vw, 40rem);
+}
+.ap-tile--bleed {
+  padding-bottom: 0;
+}
+.ap-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ap-gap);
+}
+.ap-tile-grid > .ap-tile--span {
+  grid-column: 1 / -1;
+}
+@media (max-width: 767px) {
+  .ap-tile-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Typographie ---------- */
+.ap-title-xl,
+.ap-title-lg,
+.ap-title-md {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.05;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+.ap-title-xl {
+  font-size: var(--ap-fs-xl);
+  letter-spacing: var(--ap-ls-xl);
+}
+.ap-title-lg {
+  font-size: var(--ap-fs-lg);
+  letter-spacing: var(--ap-ls-lg);
+}
+.ap-title-md {
+  font-size: var(--ap-fs-md);
+  line-height: 1.12;
+  letter-spacing: var(--ap-ls-md);
+}
+.ap-subtitle {
+  margin: 0;
+  font-size: var(--ap-fs-sub);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.004em;
+  text-wrap: balance;
+}
+.ap-eyebrow {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.29;
+  font-weight: 600;
+  color: var(--ap-fg-3);
+}
+.ap-muted {
+  color: var(--ap-fg-2);
+}
+.ap-center {
+  text-align: center;
+}
+
+/* ---------- Boutons et liens ---------- */
+.ap-pill,
+.ap-pill-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: var(--ap-pill-radius);
+  font: 400 1.0625rem/1.1 var(--ap-font);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ap-ease),
+    border-color 150ms var(--ap-ease),
+    color 150ms var(--ap-ease),
+    transform 100ms var(--ap-ease);
+}
+.ap-pill {
+  background: var(--ap-btn);
+  color: #ffffff;
+}
+.ap-pill-outline {
+  background: transparent;
+  border-color: var(--ap-link-c);
+  color: var(--ap-link-c);
+}
+.ap-pill:active,
+.ap-pill-outline:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-pill:hover {
+    background: var(--ap-btn-hover);
+    color: #ffffff;
+  }
+  .ap-pill-outline:hover {
+    background: var(--ap-link-c);
+    color: var(--ap-on-link);
+  }
+}
+
+.ap-link-more {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ap-link-c);
+  font-size: 1.0625rem;
+  line-height: 1.24;
+  text-decoration: none;
+}
+.ap-link-more::after {
+  content: '\203A';
+  content: '\203A' / '';
+  margin-left: 0.3em;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-link-more:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+/* ---------- Mouvement : entrée liée au défilement, sans JS ---------- */
+@keyframes ap-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ap-reveal {
+      animation: ap-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
+/* ---------- Lien d'évitement ---------- */
+.ap-skip {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 100;
+  padding: 12px 18px;
+  border-radius: var(--ap-pill-radius);
+  background: var(--ap-text);
+  color: #ffffff;
+  transform: translateY(-200%);
+}
+.ap-skip:focus {
+  transform: none;
+  outline: 3px solid var(--ap-btn);
+  outline-offset: 2px;
+}
+
+/* ---------- Barre fixe ---------- */
+.ap-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--ap-nav-h);
+  /* Repli opaque (aucun support de backdrop-filter, transparence réduite). */
+  background: var(--ap-bg-gray);
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.06);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .ap-nav {
+    background: rgb(245 245 247 / 0.8);
+    -webkit-backdrop-filter: saturate(1.8) blur(20px);
+    backdrop-filter: saturate(1.8) blur(20px);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .ap-nav {
+    background: var(--ap-bg-gray);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+.ap-nav__inner {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: min(100%, 1024px);
+  margin-inline: auto;
+  padding-inline: var(--ap-gutter);
+}
+.ap-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--ap-text);
+  text-decoration: none;
+}
+.ap-nav__links {
+  display: none;
+}
+.ap-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
+  padding-inline: 14px;
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--ap-nav-ink);
+  text-decoration: none;
+  transition: color 150ms var(--ap-ease);
+}
+.ap-nav__link[aria-current='page'] {
+  color: var(--ap-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+.ap-nav__link:focus-visible,
+.ap-nav__brand:focus-visible,
+.ap-nav__menu:focus-visible {
+  outline-offset: -3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-nav__link:hover {
+    color: #000000;
+  }
+}
+@media (min-width: 768px) {
+  .ap-nav__links {
+    display: flex;
+    flex: 1;
+    justify-content: space-evenly;
+    margin-left: clamp(1rem, 6vw, 4rem);
+  }
+}
+
+.ap-nav__menu,
+.ap-sheet__close {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ap-text);
+  cursor: pointer;
+  transition: transform 100ms var(--ap-ease);
+}
+.ap-nav__menu:active,
+.ap-sheet__close:active {
+  transform: scale(0.97);
+}
+@media (min-width: 768px) {
+  .ap-nav__menu {
+    display: none;
+  }
+}
+/* Icône « Menu » : deux traits de 17 px. */
+.ap-nav__menu-icon {
+  position: relative;
+  display: block;
+  width: 17px;
+  height: 9px;
+}
+.ap-nav__menu-icon::before,
+.ap-nav__menu-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.ap-nav__menu-icon::before {
+  top: 0;
+}
+.ap-nav__menu-icon::after {
+  bottom: 0;
+}
+/* Icône « Fermer » : croix de deux traits. */
+.ap-sheet__close-icon {
+  position: relative;
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+.ap-sheet__close-icon::before,
+.ap-sheet__close-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7.75px;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.ap-sheet__close-icon::before {
+  transform: rotate(45deg);
+}
+.ap-sheet__close-icon::after {
+  transform: rotate(-45deg);
+}
+
+/* ---------- Menu mobile plein écran (blanc) ---------- */
+.ap-sheet {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  background: var(--ap-bg);
+  color: var(--ap-text);
+  opacity: 0;
+  transition:
+    opacity 200ms var(--ap-ease),
+    overlay 200ms allow-discrete,
+    display 200ms allow-discrete;
+}
+.ap-sheet[open] {
+  opacity: 1;
+}
+@starting-style {
+  .ap-sheet[open] {
+    opacity: 0;
+  }
+}
+.ap-sheet::backdrop {
+  background: var(--ap-bg);
+}
+.ap-sheet__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--ap-nav-h);
+  padding-inline: var(--ap-gutter);
+}
+.ap-sheet__nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: clamp(1.5rem, 8vh, 4rem) var(--ap-gutter) 3rem;
+}
+.ap-sheet__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding-inline: 12px;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--ap-text);
+  text-decoration: none;
+}
+.ap-sheet__link[aria-current='page'] {
+  color: var(--ap-link);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+@media (min-width: 768px) {
+  .ap-sheet {
+    display: none;
+  }
+}
+
+/* ---------- Bandeau sous la barre (non fixe) ---------- */
+.ap-promo {
+  box-sizing: border-box;
+  margin-top: var(--ap-nav-h);
+  min-height: var(--ap-promo-h);
+  padding: 4px var(--ap-gutter);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.6em;
+  background: var(--ap-bg);
+  color: var(--ap-text);
+  font-size: 0.875rem;
+  line-height: 1.29;
+  text-align: center;
+}
+.ap-promo p {
+  margin: 0;
+}
+.ap-promo .ap-link-more {
+  font-size: 0.875rem;
+}
+/* Mobile : une seule ligne (texte et lien sur 13 px, marges réduites) ; sous 340 px le lien se masque, « Contact » reste dans le menu. */
+@media (max-width: 767px) {
+  .ap-promo {
+    flex-wrap: nowrap;
+    padding-inline: 12px;
+    column-gap: 0.4em;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+  .ap-promo .ap-link-more {
+    font-size: 0.8125rem;
+  }
+}
+@media (max-width: 339px) {
+  .ap-promo .ap-link-more {
+    display: none;
+  }
+}
+
+/* ---------- Page /contact ---------- */
+.ap-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: calc(100svh - var(--ap-nav-h) - var(--ap-promo-h));
+  padding-block: clamp(4rem, 9vw, 7rem);
+  background: var(--ap-bg-dark);
+  color: var(--ap-fg);
+  text-align: center;
+}
+.ap-contact__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+.ap-contact__lead {
+  max-width: 28ch;
+}
+.ap-contact__mail {
+  display: block;
+  max-width: 100%;
+  font-size: clamp(1.25rem, 5.4vw, 3rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ap-link-c);
+  overflow-wrap: anywhere;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-contact__mail:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+}
+.ap-contact__copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+}
+/* Le bouton CopyEmail garde ses classes .btn : on le met à la forme d'une pilule à contour. */
+.ap-contact__copy .btn {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid var(--ap-link-c);
+  border-radius: var(--ap-pill-radius);
+  background: transparent;
+  color: var(--ap-link-c);
+  font: 400 1.0625rem/1.1 var(--ap-font);
+  transition:
+    background-color 150ms var(--ap-ease),
+    color 150ms var(--ap-ease),
+    transform 100ms var(--ap-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-contact__copy .btn:hover {
+    background: var(--ap-link-c);
+    color: var(--ap-on-link);
+  }
+}
+.ap-contact .copy-status {
+  min-height: 1.5em;
+  font-size: 0.875rem;
+  color: var(--ap-fg-2);
+}
+.ap-contact__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem 3rem;
+  margin: clamp(1rem, 3vw, 2rem) 0 0;
+  padding: 0;
+}
+.ap-contact__list dt {
+  font-size: 0.875rem;
+  color: var(--ap-fg-2);
+}
+.ap-contact__list dd {
+  margin: 0.2rem 0 0;
+  font-size: 1.0625rem;
+  color: var(--ap-fg);
+  overflow-wrap: anywhere;
+}
+.ap-contact__list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ap-link-c);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-contact__list a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+/* ---------- Pied de page ---------- */
+.ap-footer {
+  background: var(--ap-bg-gray);
+  color: var(--ap-fg-3);
+  font-size: 0.75rem;
+  line-height: 1.33;
+  padding-block: 1.25rem 1.5rem;
+}
+.ap-footer__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgb(0 0 0 / 0.12);
+}
+@media (min-width: 640px) {
+  .ap-footer__cols {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  }
+}
+.ap-footer h3 {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: 0;
+  color: var(--ap-text);
+}
+.ap-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ap-footer li {
+  display: block;
+}
+.ap-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: 12px;
+  margin-inline: -12px;
+  color: var(--ap-fg-3);
+  text-decoration: none;
+}
+.ap-footer a[aria-current='page'] {
+  color: var(--ap-text);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ap-footer a:hover {
+    color: var(--ap-text);
+    text-decoration: underline;
+  }
+}
+.ap-footer__item {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.ap-footer__sign {
+  margin: 0.75rem 0 0;
+}
+
+/* ---------- Préférences de mouvement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ap-pill,
+  .ap-pill-outline,
+  .ap-nav__menu,
+  .ap-sheet__close,
+  .ap-contact__copy .btn {
+    transition-property: background-color, border-color, color;
+  }
+  .ap-pill:active,
+  .ap-pill-outline:active,
+  .ap-nav__menu:active,
+  .ap-sheet__close:active {
+    transform: none;
+  }
+  .ap-sheet {
+    transition-duration: 120ms;
+  }
+}
+
+/* ---------- Contraste renforcé ---------- */
+@media (prefers-contrast: more) {
+  .ap-nav {
+    background: var(--ap-bg-gray);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: inset 0 -1px 0 var(--ap-text);
+  }
+  .ap-nav__link {
+    color: var(--ap-text);
+  }
+}

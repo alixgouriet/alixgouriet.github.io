@@ -1,7 +1,7 @@
 export function SkipLink() {
   return (
     <a
-      className="skip"
+      className="ap-skip"
       href="#contenu"
       onClick={(e) => {
         e.preventDefault()

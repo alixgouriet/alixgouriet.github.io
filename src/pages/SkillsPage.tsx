@@ -6,40 +6,48 @@ export function SkillsPage() {
   return (
     <>
       <title>Compétences · Alix Gouriet</title>
-      <div className="wrap page">
-        <div className="page-head">
-          <h1>Compétences</h1>
-          <p className="lead">
-            Chaque outil renvoie aux projets où je l'ai utilisé. «&nbsp;Sur CV&nbsp;» signale un outil qui figure
-            sur mon CV et qu'aucun projet de ce site ne documente encore.
+      <section className="ap-section ap-section--white pg-head">
+        <div className="ap-container ap-center">
+          <h1 className="ap-title-xl">Compétences</h1>
+          <p className="pg-lead ap-muted">Chaque outil renvoie aux projets qui le prouvent.</p>
+        </div>
+      </section>
+      <section className="ap-section ap-section--white pg-list" aria-label="Outils">
+        <div className="ap-container ap-container--wide">
+          <ul className="pg-skill-grid">
+            {rows.map(({ skill, proofs }) => (
+              <li key={skill.id} className="ap-tile ap-tile--gray pg-skill ap-reveal">
+                <h2 className="ap-title-md">{skill.label}</h2>
+                {proofs.length > 0 ? (
+                  <ul className="pg-chips">
+                    {proofs.map((p) => (
+                      <li key={p.slug}>
+                        <Link
+                          to={`/projets/${p.slug}`}
+                          className="pg-chip"
+                          aria-label={
+                            p.toolsFromCv?.includes(skill.id)
+                              ? `${skill.label}, utilisé dans ${p.title}, d’après mon CV`
+                              : `${skill.label}, prouvé par ${p.title}`
+                          }
+                          viewTransition
+                        >
+                          {p.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="pg-cv">Mentionné dans mon CV</p>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="pg-legend">
+            «&nbsp;Mentionné dans mon CV&nbsp;» : outil indiqué sur mon CV, qu’aucun projet de ce site ne documente encore. Pour Python, la source est mon CV : aucun fichier Python n’est montré ici.
           </p>
         </div>
-        <ul className="plist">
-          {rows.map(({ skill, proofs }) => (
-            <li key={skill.id} className="srow">
-              <span className="srow-name">{skill.label}</span>
-              {proofs.length > 0 ? (
-                <ul className="chips">
-                  {proofs.map((p) => (
-                    <li key={p.slug}>
-                      <Link
-                        to={`/projets/${p.slug}`}
-                        className="chip"
-                        aria-label={`${skill.label}, prouvé par ${p.title}`}
-                        viewTransition
-                      >
-                        {p.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <span className="muted">Sur CV</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      </section>
     </>
   )
 }

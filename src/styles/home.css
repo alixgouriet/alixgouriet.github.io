@@ -1,0 +1,283 @@
+/*
+ * home.css : page d'accueil (v4, grammaire apple.fr). Préfixe .home-. Chargé après apple-base.css.
+ * Les visuels de src/charts gardent leurs classes (.rv, .er, .bars, .chain) : ici on les recolore
+ * avec les variables --ap-* pour qu'ils restent lisibles sur tuile noire, grise ou blanche.
+ */
+
+/* ---------- Hero ---------- */
+.home-hero {
+  padding-block: clamp(1.5rem, 3vw, 2.25rem) clamp(2rem, 4vw, 3rem);
+}
+.home-hero__sub {
+  max-width: 24em;
+  margin: clamp(0.75rem, 1.6vw, 1rem) auto 0;
+}
+.home-hero__status {
+  max-width: 30em;
+  margin: 0.5rem auto 0;
+  font-size: 1.0625rem;
+}
+.home-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem 1.25rem;
+  margin-top: clamp(1rem, 2vw, 1.25rem);
+}
+.home-portrait {
+  display: block;
+  width: min(100%, 331px);
+  height: auto;
+  aspect-ratio: 331 / 428;
+  margin: clamp(1.5rem, 3vw, 2rem) auto 0;
+  border-radius: var(--ap-radius);
+  object-fit: cover;
+  background: #d2d2d7;
+}
+
+/* ---------- Accroche et tuiles projet ---------- */
+.home-projects {
+  padding-block: clamp(3rem, 7vw, 5.5rem) var(--ap-gap);
+}
+.home-lede {
+  max-width: 20em;
+  margin: 0 auto clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 600;
+}
+.home-stack {
+  display: grid;
+  gap: var(--ap-gap);
+  width: min(100% - 2 * var(--ap-gap), 1680px);
+  margin-inline: auto;
+}
+.home-tile {
+  --home-bg: var(--ap-bg-gray);
+  --home-line: #d2d2d7;
+  --home-res: #c6285e;
+  justify-content: flex-start;
+  min-height: clamp(40rem, 52vw, 44rem);
+  padding-top: clamp(2.5rem, 6vw, 4.25rem);
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+.home-tile.ap-tile--dark {
+  --home-bg: #000;
+  --home-line: #3a3a3c;
+  --home-res: #ff8fb0;
+}
+.home-tile .ap-eyebrow {
+  margin-bottom: 0.5rem;
+}
+.home-tile__line {
+  margin-top: 0.75rem;
+  max-width: 26em;
+}
+.home-tile .home-links {
+  margin-top: 1rem;
+}
+.home-visual {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 760px);
+  margin-top: clamp(1.5rem, 3.5vw, 2.5rem);
+  text-align: left;
+}
+.home-visual > * {
+  width: 100%;
+}
+.home-visual--greensd {
+  width: min(100%, 820px);
+}
+.home-tile .er-svg {
+  max-height: 340px;
+  margin-inline: auto;
+}
+.home-visual--educheck {
+  width: min(100%, 900px);
+}
+.home-visual--villes-natalistes {
+  width: min(100%, 640px);
+}
+.home-more-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 1.25rem;
+}
+.home-visual .m-0 {
+  margin: 0;
+}
+.home-tile .visual-cap,
+.home-tile .er figcaption {
+  display: block;
+  max-width: 44em;
+  margin: 1rem auto 0;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: var(--ap-fg-2);
+}
+
+/* Visuels : couleurs liées à la tuile (jetons --ap-*) */
+/* Segments : grandes pastilles sobres, sans valeur chiffrée */
+.segments {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.segments li {
+  padding: 0.9rem 1.6rem;
+  border-radius: var(--ap-pill-radius);
+  background: color-mix(in srgb, var(--ap-fg) 12%, transparent);
+  color: var(--ap-fg);
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+.home-tile .er-frame {
+  background: transparent;
+  padding: 0;
+}
+.home-tile .er-box {
+  fill: transparent;
+  stroke: var(--ap-fg-2);
+}
+.home-tile .er-head {
+  fill: var(--ap-fg);
+}
+.home-tile .er-title {
+  fill: var(--home-bg);
+}
+.home-tile .er-col {
+  fill: var(--ap-fg);
+}
+.home-tile .er-link {
+  stroke: var(--ap-link-c);
+}
+.home-tile .er-arrow {
+  fill: var(--ap-link-c);
+}
+.home-tile .chain li {
+  justify-content: center;
+  border-color: var(--ap-fg-2);
+  color: var(--ap-fg);
+}
+.home-tile .chain li + li::before {
+  left: 50%;
+  background: var(--ap-link-c);
+}
+.home-tile .chain li::after {
+  color: var(--ap-fg-2);
+}
+.home-tile .chain li:last-child {
+  border-color: var(--ap-link-c);
+}
+.home-tile .bar-label {
+  color: var(--ap-fg);
+}
+.home-tile .bar-track {
+  background: var(--home-line);
+}
+.home-tile .bar-fill {
+  background: var(--ap-fg-2);
+}
+.home-tile .bar-fill.is-main {
+  background: var(--ap-link-c);
+}
+
+@media (min-width: 768px) {
+  .home-tile .chain {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 2rem;
+  }
+  .home-tile .chain li {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 0.5rem;
+    font-size: 1.5rem;
+  }
+  .home-tile .chain li + li {
+    margin-top: 0;
+  }
+  .home-tile .chain li + li::before {
+    left: -2rem;
+    top: 50%;
+    width: 2rem;
+    height: 2px;
+  }
+}
+
+/* ---------- Réalisations sans fiche ---------- */
+.home-more {
+  padding-top: 6rem;
+}
+.home-more .ap-tile-grid {
+  align-content: start;
+  grid-auto-rows: 1fr;
+}
+.home-more__title {
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+.home-half {
+  justify-content: center;
+  min-height: 17rem;
+  cursor: default;
+}
+.home-half .ap-eyebrow {
+  margin-bottom: 0.5rem;
+}
+.home-half__sub {
+  margin: 0.75rem 0 0;
+  max-width: 28em;
+  text-wrap: balance;
+}
+.home-half__tools {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+}
+.home-badge {
+  margin: 1.25rem 0 0;
+  color: var(--ap-text-2);
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+/* ---------- Compétences, À propos ---------- */
+.home-block__sub {
+  margin: clamp(1rem, 2.5vw, 1.5rem) auto 0;
+  max-width: 24em;
+}
+.home-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: clamp(1.5rem, 4vw, 2.25rem) auto 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+.home-chips li {
+  padding: 0.45rem 1rem;
+  border-radius: var(--ap-pill-radius);
+  background: var(--ap-bg);
+  color: var(--ap-text);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 767px) {
+  .home-tile {
+    min-height: 0;
+  }
+  .home-half {
+    min-height: 0;
+  }
+}

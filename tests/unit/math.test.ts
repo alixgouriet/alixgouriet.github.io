@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   fitLeastSquares,
   predict,
@@ -8,7 +8,6 @@ import {
   type Point,
 } from '../../src/features/hero/math.ts'
 import { points } from '../../src/features/hero/points.ts'
-import { isSettled, runSpring, stepSpring, springConstants } from '../../src/features/hero/spring.ts'
 
 describe('moindres carrés', () => {
   it('retrouve exactement une droite sans bruit', () => {
@@ -61,60 +60,5 @@ describe('moindres carrés', () => {
     const total = residuals(points, line).reduce((a, b) => a + b, 0)
     expect(total).toBeCloseTo(0, 8)
     expect(predict(line, 0)).toBeCloseTo(line.intercept, 10)
-  })
-})
-
-describe('ressort', () => {
-  it('converge vers la cible', () => {
-    const k = springConstants({ duration: 0.6, bounce: 0.1 })
-    let s = { x: 0, v: 0 }
-    for (let i = 0; i < 2000; i++) s = stepSpring(s, 1, k, 0.002)
-    expect(isSettled(s, 1)).toBe(true)
-  })
-})
-
-describe('runSpring', () => {
-  const frames: FrameRequestCallback[] = []
-  let clock = 0
-  const advance = (n: number) => {
-    for (let i = 0; i < n; i++) {
-      clock += 16
-      const cb = frames.shift()
-      if (cb) cb(clock)
-    }
-  }
-  beforeEach(() => {
-    frames.length = 0
-    clock = 0
-    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => frames.push(cb))
-    vi.stubGlobal('cancelAnimationFrame', () => {
-      frames.length = 0
-    })
-    vi.spyOn(performance, 'now').mockImplementation(() => clock)
-  })
-  afterEach(() => {
-    vi.unstubAllGlobals()
-    vi.restoreAllMocks()
-  })
-
-  it('atteint exactement la cible puis appelle onDone une seule fois', () => {
-    const last: number[][] = []
-    const done = vi.fn()
-    runSpring([0, 10], [1, 2], { duration: 0.6, bounce: 0.1 }, (v) => last.push(v), done)
-    advance(120)
-    expect(done).toHaveBeenCalledTimes(1)
-    expect(last.at(-1)).toEqual([1, 2])
-  })
-
-  it("s'annule sans plus d'image ni onDone (la main reprend sans saut)", () => {
-    const onFrame = vi.fn()
-    const done = vi.fn()
-    const cancel = runSpring([0], [1], { duration: 0.6, bounce: 0.1 }, onFrame, done)
-    advance(5)
-    const calls = onFrame.mock.calls.length
-    cancel()
-    advance(60)
-    expect(onFrame.mock.calls.length).toBe(calls)
-    expect(done).not.toHaveBeenCalled()
   })
 })

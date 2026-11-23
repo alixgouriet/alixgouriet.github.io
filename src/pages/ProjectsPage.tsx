@@ -1,56 +1,77 @@
-import { useDeferredValue } from 'react'
 import { useSearchParams } from 'react-router'
 import { Filters } from '../features/projects/Filters.tsx'
 import { ProjectList } from '../features/projects/ProjectList.tsx'
 import {
-  availableProjects,
   filterProjects,
+  filtersToParams,
+  isAvailable,
+  NO_FILTER,
+  numbering,
+  parseFilters,
+  recentFirst,
   showFilters,
-  upcomingProjects,
+  stats,
   type Filters as FilterState,
 } from '../data/derive.ts'
 import { projects } from '../data/projects.ts'
-import type { Category, ToolId } from '../data/types.ts'
 
-const available = availableProjects(projects)
-const upcoming = upcomingProjects(projects)
+// Données statiques : tri, numéros et compteurs calculés une seule fois.
+const sorted = recentFirst(projects)
+const numbers = numbering(projects)
+const counts = stats(projects)
 
 export function ProjectsPage() {
   const [params, setParams] = useSearchParams()
   const filtersVisible = showFilters(projects)
 
-  const value: FilterState = {
-    categories: filtersVisible ? (params.getAll('categorie') as Category[]) : [],
-    tools: filtersVisible ? (params.getAll('techno') as ToolId[]) : [],
-  }
-  const deferred = useDeferredValue(value)
-  const shown = filterProjects(available, deferred)
-  const noFilter = deferred.categories.length + deferred.tools.length === 0
+  const value = filtersVisible ? parseFilters(params, projects) : NO_FILTER
+  // Fiches détaillées d'abord, puis « en préparation » ; chaque groupe reste du plus récent au plus ancien.
+  const filtered = filterProjects(sorted, value)
+  const shown = [...filtered.filter(isAvailable), ...filtered.filter((p) => !isAvailable(p))]
 
-  const onChange = (next: FilterState) => {
-    const sp = new URLSearchParams()
-    next.categories.forEach((c) => sp.append('categorie', c))
-    next.tools.forEach((t) => sp.append('techno', t))
-    setParams(sp, { replace: true, preventScrollReset: true })
-  }
+  const onChange = (next: FilterState) =>
+    setParams(filtersToParams(next), { replace: true, preventScrollReset: true })
+  const reset = () => onChange(NO_FILTER)
 
   return (
     <>
       <title>Projets et SAE · Alix Gouriet</title>
-      <div className="wrap page">
-        <div className="page-head">
-          <h1>Projets et SAE</h1>
-          <p className="lead">Les travaux réalisés pendant mon BUT, avec leurs outils et leurs résultats.</p>
+      <section className="ap-section ap-section--white pg-head">
+        <div className="ap-container ap-center">
+          <h1 className="ap-title-xl">Projets et SAE</h1>
+          <p className="ap-subtitle ap-muted pg-sub">
+            Les travaux réalisés pendant mon BUT, avec leurs outils et leurs résultats.
+          </p>
+          <dl className="pg-stats">
+            <div>
+              <dt>Réalisations</dt>
+              <dd className="tnum">{counts.total}</dd>
+            </div>
+            <div>
+              <dt>Fiches détaillées</dt>
+              <dd className="tnum">{counts.detailed}</dd>
+            </div>
+            <div>
+              <dt>Outils cités</dt>
+              <dd className="tnum">{counts.tools}</dd>
+            </div>
+          </dl>
         </div>
-        {filtersVisible ? (
-          <Filters value={value} onChange={onChange} shown={shown.length} total={available.length} />
-        ) : null}
-        {shown.length > 0 ? (
-          <ProjectList items={noFilter ? [...shown, ...upcoming] : shown} />
-        ) : (
-          <p>Aucun projet ne correspond à ces filtres.</p>
-        )}
-      </div>
+      </section>
+      <section className="ap-section ap-section--white pg-list" aria-label="Liste des projets">
+        <div className="ap-container ap-container--wide">
+          {filtersVisible ? (
+            <Filters value={value} onChange={onChange} onReset={reset} shown={shown.length} total={projects.length} />
+          ) : null}
+          {shown.length > 0 ? (
+            <ProjectList items={shown} numbers={numbers} fadeKey={filtersToParams(value).toString()} />
+          ) : (
+            <div className="ap-tile ap-tile--gray pg-empty">
+              <p className="ap-title-md">Aucun projet ne correspond à ces filtres.</p>
+            </div>
+          )}
+        </div>
+      </section>
     </>
   )
 }
