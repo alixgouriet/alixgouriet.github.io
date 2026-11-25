@@ -127,26 +127,24 @@ test.describe('mouvement actif : état final lisible', () => {
     })
   }
 
-  test('accueil : le titre de chaque tuile est dans le DOM et visible quand il est au centre (recouvrement sortant toléré)', async ({ page }) => {
+  test('fiches : le h2 « En images » de la scène est dans le DOM et visible, à opacité 1, quand il est au centre', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await load(page, '/')
-    await settle(page)
-    const titles = page.locator('main article.home-tile').getByRole('heading', { level: 2 })
-    const n = await titles.count()
-    expect(n).toBe(4)
-    for (let i = 0; i < n; i++) {
-      const h = titles.nth(i)
+    for (const route of FICHES) {
+      await load(page, route)
+      await settle(page)
+      const h = page.getByRole('heading', { level: 2, name: 'En images', exact: true })
+      await expect(h, route).toHaveCount(1)
       await expect(h).toHaveText(/\S/)
       await h.evaluate((e) => e.scrollIntoView({ block: 'center' }))
       await page.waitForTimeout(250)
-      await expect(h).toBeVisible()
-      await expect(h).toBeInViewport({ ratio: 1 })
+      await expect(h, route).toBeVisible()
+      await expect(h, route).toBeInViewport({ ratio: 1 })
       const eff = await h.evaluate((e) => {
         let o = 1
         for (let n: HTMLElement | null = e as HTMLElement; n; n = n.parentElement) o *= parseFloat(getComputedStyle(n).opacity)
         return o
       })
-      expect(eff, `titre de tuile ${i + 1} au centre`).toBeGreaterThanOrEqual(0.99)
+      expect(eff, `${route} : titre de scène au centre`).toBeGreaterThanOrEqual(0.99)
     }
   })
 
@@ -224,6 +222,8 @@ test.describe('aucun scroll-jacking', () => {
       await page.mouse.move(200, 300)
       let last = await page.evaluate(() => window.scrollY)
       for (let i = 0; i < 4; i++) {
+        // L'accueil est court (hero, chiffres, parcours) : en tablette la 4e molette peut déjà être au bas de page.
+        if (await page.evaluate(() => Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight - 1)) break
         await page.mouse.wheel(0, 300)
         await page.waitForTimeout(150)
         const y = await page.evaluate(() => window.scrollY)
@@ -248,7 +248,7 @@ test.describe('aucun scroll-jacking', () => {
     await page.waitForTimeout(200)
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300)
     // Lien de page (pas de la barre), puis lien de la barre fixe.
-    const toProjets = page.locator('main').getByRole('link', { name: /Voir les projets|En savoir plus sur/ }).first()
+    const toProjets = page.locator('main').getByRole('link', { name: 'Voir les projets', exact: true }).first()
     await toProjets.scrollIntoViewIfNeeded()
     await toProjets.click()
     await expect(page.locator('main h1')).toBeFocused()
@@ -424,6 +424,13 @@ test.describe('performance du mouvement', () => {
       }
       await check('haut de page')
       await sweep(page, async () => {})
+      // Sur l'accueil, « Mon parcours » est la dernière section : en bas de page elle reste en partie à l'écran (au-dessus du
+      // pied de page), donc son will-change (posé seulement pendant qu'elle est à l'écran) est légitime. On revient en haut
+      // avant de vérifier qu'aucun will-change ne reste. Sur les autres pages la fin de page est loin des scènes.
+      if (route === '/') {
+        await page.evaluate(() => window.scrollTo(0, 0))
+        await page.waitForTimeout(400)
+      }
       await check('après défilement')
       if ((page.viewportSize()?.width ?? 1280) === 375) {
         await page.evaluate(() => window.scrollTo(0, 0))

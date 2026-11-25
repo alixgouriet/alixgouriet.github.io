@@ -34,7 +34,7 @@ export function LocalBar() {
           Alix Gouriet
         </Link>
         <div className="ap-local__links">
-          <Link to="/#projets" className="ap-local__link">
+          <Link to="/projets" className="ap-local__link" viewTransition>
             Projets
           </Link>
           <Link to="/contact" className="ap-local__pill" viewTransition>

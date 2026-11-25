@@ -1,10 +1,6 @@
 import { Link } from 'react-router'
 import { HomeFigures } from '../features/home/HomeFigures.tsx'
-import { HomeSkills } from '../features/home/HomeSkills.tsx'
 import { ParcoursScene } from '../features/home/ParcoursScene.tsx'
-import { ProjectTiles } from '../features/home/ProjectTiles.tsx'
-import { PendingTiles } from '../features/home/PendingTiles.tsx'
-import { ACCROCHE } from '../data/copy.ts'
 
 export function HomePage() {
   return (
@@ -46,24 +42,6 @@ export function HomePage() {
 
       <HomeFigures />
       <ParcoursScene />
-      <HomeSkills />
-
-      <section id="projets" className="ap-section ap-section--white home-projects" aria-label="Projets">
-        <div className="ap-container ap-container--wide ap-center">
-          {/* À VALIDER PAR ALIX : accroche de l'accueil (src/data/copy.ts). */}
-          <p className="ap-title-lg home-lede">{ACCROCHE}</p>
-        </div>
-        <ProjectTiles />
-      </section>
-
-      <section className="ap-section ap-section--white home-more" aria-labelledby="autres-titre">
-        <div className="ap-container ap-container--wide">
-          <h2 id="autres-titre" className="ap-title-lg ap-center home-more__title">
-            Autres réalisations
-          </h2>
-          <PendingTiles />
-        </div>
-      </section>
     </>
   )
 }

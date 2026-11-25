@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router'
 import { Illustration } from '../charts/illustrations/Illustration.tsx'
 import { ProjectVisual } from '../charts/ProjectVisual.tsx'
 import { availableProjects, findProject, toolLabel } from '../data/derive.ts'
+import { ProjectScene } from '../features/projects/ProjectScene.tsx'
+import type { AvailableProject } from '../data/types.ts'
 import { NotFoundPage } from './NotFoundPage.tsx'
 import PrixImmobiliers from '../content/projects/prix-immobiliers-niortais.tsx'
 import VillesNatalistes from '../content/projects/villes-natalistes.tsx'
@@ -72,6 +74,12 @@ export function ProjectPage() {
               </div>
             </dl>
           </header>
+        </div>
+      </section>
+
+      <section className="ap-section ap-section--white pg-scene" aria-label="Le projet en images">
+        <div className="home-stack">
+          <ProjectScene project={project as AvailableProject} tone="gray" />
         </div>
       </section>
 

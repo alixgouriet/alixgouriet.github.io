@@ -1,8 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { FICHES, load } from './helpers'
-import { skills } from '../../src/data/skills'
-
-const ACCROCHE = '9 réalisations, dont 4 détaillées, avec SQL, R, Excel et VBA.'
+import { load } from './helpers'
 
 test('accueil : un seul h1 « Alix Gouriet », sous-titre et statut de recherche de stage', async ({ page }) => {
   await load(page, '/')
@@ -53,71 +50,24 @@ test('accueil : plus de hero interactif (aucun graphique de régression, curseur
   await expect(page.getByText('Régression interactive')).toHaveCount(0)
   // Aucun contrôle de formulaire dans le hero.
   await expect(page.locator('section[aria-labelledby="accueil-titre"]').locator('input, select, button, svg')).toHaveCount(0)
-  // Aucun bouton dans toute la page principale (les tuiles ne contiennent que des liens).
+  // Aucun bouton dans toute la page principale .
   await expect(page.locator('main button')).toHaveCount(0)
 })
 
-test('accueil : accroche calculée « 9 réalisations, dont 4 détaillées, avec SQL, R, Excel et VBA. » (Python exclu)', async ({ page }) => {
+test('accueil : plus de tuiles de projets, d’« Autres réalisations », de compétences ni de lien « En savoir plus »', async ({ page }) => {
   await load(page, '/')
-  const lede = page.locator('section[aria-label="Projets"] .home-lede')
-  await expect(lede).toBeVisible()
-  await expect(lede).toHaveText(ACCROCHE)
-  await expect(lede).not.toContainText('Python')
-})
-
-test('accueil : 4 tuiles de projets, chacune avec titre h2 et un seul lien « En savoir plus sur … »', async ({ page }) => {
-  await load(page, '/')
-  const tiles = page.locator('main article.home-tile')
-  await expect(tiles).toHaveCount(4)
-  const hrefs: string[] = []
-  for (let i = 0; i < 4; i++) {
-    const tile = tiles.nth(i)
-    await expect(tile.getByRole('heading', { level: 2 })).toBeVisible()
-    const more = tile.getByRole('link', { name: /^En savoir plus sur / })
-    await expect(more).toHaveCount(1)
-    await expect(tile.getByRole('link')).toHaveCount(1) // un SEUL lien par tuile
-    await expect(tile.getByRole('link', { name: /^Voir la fiche/ })).toHaveCount(0)
-    const href = (await more.getAttribute('href')) as string
-    hrefs.push(href)
-  }
-  expect([...hrefs].sort()).toEqual([...FICHES].sort())
-  // Pas d'élément masqué en attendant une révélation : tout le texte est dans le DOM et lisible.
-  await expect(page.getByText('À venir')).toHaveCount(0)
-})
-
-test("accueil : une fiche s'ouvre depuis une tuile (focus h1, scrollY 0)", async ({ page }) => {
-  await load(page, '/')
-  const first = page.locator('main article.home-tile').first().getByRole('link', { name: /^En savoir plus sur / })
-  const href = (await first.getAttribute('href')) as string
-  await first.scrollIntoViewIfNeeded()
-  await first.click()
-  await expect(page).toHaveURL(href)
-  await expect(page.locator('main h1')).toBeFocused()
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
-})
-
-test('accueil : « Autres réalisations », 5 demi-tuiles aria-disabled sans lien ni focus', async ({ page }) => {
-  await load(page, '/')
-  const section = page.getByRole('region', { name: 'Autres réalisations', exact: true })
-  await expect(section.getByRole('heading', { level: 2, name: 'Autres réalisations' })).toBeVisible()
-  const halves = section.locator('article.home-half')
-  await expect(halves).toHaveCount(5)
-  for (let i = 0; i < 5; i++) {
-    const h = halves.nth(i)
-    await expect(h).toHaveAttribute('aria-disabled', 'true')
-    await expect(h.locator('a')).toHaveCount(0)
-    await expect(h.locator('button')).toHaveCount(0)
-    await expect(h.locator('[tabindex]')).toHaveCount(0)
-    await expect(h.getByRole('heading', { level: 3 })).toBeVisible()
-    await expect(h.getByText('Fiche en préparation', { exact: true })).toBeVisible() // dit en texte, pas seulement en couleur
-  }
-  await expect(section.getByRole('link')).toHaveCount(0)
-  // Navigation clavier : aucun arrêt de Tab dans ces tuiles.
-  await page.locator('main h1').focus()
-  for (let i = 0; i < 40; i++) {
-    await page.keyboard.press('Tab')
-    expect(await page.evaluate(() => !!document.activeElement?.closest('.home-half')), `Tab ${i + 1}`).toBe(false)
-  }
+  await expect(page.locator('main article.home-tile')).toHaveCount(0)
+  await expect(page.locator('main article.home-half')).toHaveCount(0)
+  await expect(page.locator('.home-lede, .home-skills, .home-skill')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /^En savoir plus sur / })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /^Voir la fiche/ })).toHaveCount(0)
+  for (const name of ['Projets', 'Compétences', 'Autres réalisations'])
+    await expect(page.getByRole('region', { name, exact: true }), name).toHaveCount(0)
+  await expect(page.getByText('Fiche en préparation')).toHaveCount(0)
+  // Les 4 scènes de projets ne sont plus sur l'accueil : seule la scène « Mon parcours » y reste.
+  await expect(page.locator('article.scene')).toHaveCount(1)
+  await expect(page.locator('article.scene--parcours')).toHaveCount(1)
+  await expect(page.getByRole('list', { name: /^Étapes : / })).toHaveCount(0)
 })
 
 test('accueil : rangée de chiffres calculés (9 réalisations, 4 fiches détaillées, 15 outils cités)', async ({ page }) => {
@@ -133,32 +83,6 @@ test('accueil : rangée de chiffres calculés (9 réalisations, 4 fiches détail
     ['Fiches détaillées', '4'],
     ['Outils cités', '15'],
   ])
-})
-
-test('accueil : « Compétences » liste les outils de skills.ts, groupés, sans niveau ni pourcentage', async ({ page }) => {
-  await load(page, '/')
-  const section = page.getByRole('region', { name: 'Compétences', exact: true })
-  await expect(section.getByRole('heading', { level: 2, name: 'Compétences' })).toBeVisible()
-  const names = await section.locator('.home-skill__name').allTextContents()
-  expect(names.map((n) => n.trim()).sort()).toEqual(skills.map((s) => s.label).sort())
-  expect(await section.getByRole('heading', { level: 3 }).count()).toBeGreaterThanOrEqual(2)
-  // Outils sans projet : « Mentionné dans mon CV ».
-  for (const label of ['SAS', 'HTML', 'CSS', 'JavaScript']) {
-    const item = section.locator('.home-skill', { has: page.getByText(label, { exact: true }) })
-    await expect(item, label).toContainText('Mentionné dans mon CV')
-    await expect(item.getByRole('link')).toHaveCount(0)
-  }
-  // Python : source = CV (GreenSD), dit dans le nom accessible du lien.
-  const python = section.locator('.home-skill', { has: page.getByText('Python', { exact: true }) })
-  await expect(python.getByRole('link', { name: /utilisé dans GreenSD, d[’']après mon CV/ })).toHaveAttribute('href', '/projets/greensd')
-  // Les outils prouvés renvoient vers leurs fiches.
-  const sql = section.locator('.home-skill', { has: page.getByText('SQL (MySQL)', { exact: true }) })
-  expect(await sql.getByRole('link').count()).toBeGreaterThan(0)
-  // Aucun niveau.
-  await expect(section.getByRole('progressbar')).toHaveCount(0)
-  await expect(section.getByRole('meter')).toHaveCount(0)
-  await expect(section.locator('progress, meter, [role="progressbar"], [role="meter"]')).toHaveCount(0)
-  expect(((await section.textContent()) ?? '')).not.toMatch(/%/)
 })
 
 test('accueil : plus de section « À propos » courte ni de rubrique « valeurs »', async ({ page }) => {
@@ -180,8 +104,8 @@ test('accueil : bandeau « Stage de 10 semaines dès avril 2027 » juste sous la
   expect(bar.y).toBeGreaterThanOrEqual(header.y + header.height - 1)
 })
 
-test('accueil : ordre des sections (hero, chiffres, parcours, compétences, projets, autres réalisations)', async ({ page }) => {
+test('accueil : ordre des sections (hero, chiffres, parcours)', async ({ page }) => {
   await load(page, '/')
   const order = await page.locator('main > section').evaluateAll((els) => els.map((e) => e.getAttribute('aria-labelledby') ?? e.getAttribute('aria-label')))
-  expect(order).toEqual(['accueil-titre', 'Chiffres', 'parcours-titre', 'competences-titre', 'Projets', 'autres-titre'])
+  expect(order).toEqual(['accueil-titre', 'Chiffres', 'parcours-titre'])
 })

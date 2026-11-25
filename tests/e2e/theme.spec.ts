@@ -303,25 +303,6 @@ test.describe('(h) illustrations', () => {
     expect(order[0]).toBe('pg-thumb')
   })
 
-  test('accueil : 5 illustrations dans « Autres réalisations », une par demi-tuile, avec nom accessible', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await load(page, '/')
-    const region = page.getByRole('region', { name: 'Autres réalisations', exact: true })
-    await region.scrollIntoViewIfNeeded()
-    const tiles = region.locator('.ap-tile.home-half')
-    await expect(tiles).toHaveCount(5)
-    for (let i = 0; i < 5; i++) {
-      const t = tiles.nth(i)
-      await expect(t.locator('.ill-frame'), `demi-tuile ${i + 1}`).toHaveCount(1)
-      // L'illustration est le premier enfant de la tuile.
-      expect(await t.evaluate((e) => e.firstElementChild?.classList.contains('ill-frame'))).toBe(true)
-      await expect(t.locator('svg[role="img"]')).toHaveCount(1, { timeout: 6000 })
-      expect(((await t.locator('svg[role="img"]').getAttribute('aria-label')) ?? '').trim().length).toBeGreaterThan(8)
-    }
-    // Les demi-tuiles restent non cliquables et non focusables.
-    await expect(tiles.locator('a, button, [tabindex]')).toHaveCount(0)
-  })
-
   for (const slug of FICHES) {
     test(`fiche ${slug} : 1 illustration de couverture avec role=img et aria-label non vide`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -369,20 +350,29 @@ test.describe('(h) illustrations', () => {
     for (const [i, h] of after.entries()) expect(Math.abs(h - sizes[i].h), `vignette ${i + 1} : hauteur stable`).toBeLessThanOrEqual(0.5)
   })
 
-  test('chargement différé : l’accueil ne charge pas tout de suite les 5 modules ; une fiche ne charge que la sienne', async ({ page }) => {
+  test('chargement différé : l’accueil ne charge aucune illustration ; /projets charge d’abord celles proches de l’écran ; une fiche ne charge que la sienne', async ({ page }) => {
     const loaded: string[] = []
     page.on('request', (r) => {
       if (ILL_SRC.test(r.url()) && !/\/(Ill|Illustration|index)\.(tsx|ts|js)/.test(r.url()) && !/\.css/.test(r.url())) loaded.push(r.url().split('/').pop()!.split('?')[0])
     })
     await page.emulateMedia({ reducedMotion: 'reduce' })
+    // Accueil : plus aucune illustration (ni demi-tuile ni tuile), donc aucun module d'illustration, même après le repli de 1,5 s.
     await page.goto('/', { waitUntil: 'domcontentloaded' })
+    await expect(page.locator('main h1')).toBeVisible()
+    await page.waitForTimeout(2500)
+    expect([...new Set(loaded)], 'modules d’illustration chargés par l’accueil').toEqual([])
+    await expect(page.locator('.ill-frame')).toHaveCount(0)
+
+    // /projets : 9 vignettes ; mesuré en desktop (1280 × 800) : 2 modules avant 0,5 s (celles proches de l'écran), 9 après le repli.
+    loaded.length = 0
+    await page.goto('/projets', { waitUntil: 'domcontentloaded' })
     await expect(page.locator('main h1')).toBeVisible()
     await page.waitForTimeout(500)
     const early = new Set(loaded)
-    expect(early.size, `chargés avant 0,5 s sur l’accueil (hors écran) : ${[...early]}`).toBeLessThan(5)
+    expect(early.size, `chargés avant 0,5 s sur /projets (vignettes hors écran différées) : ${[...early]}`).toBeLessThan(9)
     // Le contenu hors écran finit par charger (défilement ou repli).
-    await page.getByRole('region', { name: 'Autres réalisations', exact: true }).scrollIntoViewIfNeeded()
-    await expect(page.locator('.home-half svg[role="img"]')).toHaveCount(5, { timeout: 6000 })
+    await page.locator('ul.pg-grid').scrollIntoViewIfNeeded()
+    await expect(page.locator('.pg-grid .pg-thumb svg[role="img"]')).toHaveCount(9, { timeout: 6000 })
 
     loaded.length = 0
     await page.goto(FICHE, { waitUntil: 'domcontentloaded' })
@@ -430,7 +420,7 @@ test.describe('(h) illustrations', () => {
 test.describe('(i) espaces insécables fines et absence de séquences d’échappement littérales', () => {
   const bodyText = (page: Page) => page.evaluate(() => document.body.textContent ?? '')
 
-  for (const route of ['/', FICHES[1], '/projets']) {
+  for (const route of [FICHES[1], '/projets']) {
     test(`« +5 % » et « +6 % » avec espace insécable fine : ${route}`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await load(page, route)
@@ -446,14 +436,19 @@ test.describe('(i) espaces insécables fines et absence de séquences d’échap
     })
   }
 
-  test('GrowthBars (fiche Villes natalistes) : « +5 % » et « +6 % » en espace insécable fine U+202F', async ({ page }) => {
+  test('GrowthBars (fiche Villes natalistes) : « +5 % » et « +6 % » en espace insécable fine U+202F, dans la scène et dans le visuel', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await load(page, FICHES[1])
+    // Le même visuel est rendu deux fois sur la fiche : dans la scène « En images » et dans la section du visuel.
     const bars = page.locator('ul.bars[aria-label="Évolution de la population, 2016 à 2022"]')
-    await expect(bars).toHaveCount(1)
-    const txt = await bars.evaluate((f) => f.textContent ?? '')
-    expect(txt).toContain('+5\u202f%')
-    expect(txt).toContain('+6\u202f%')
+    await expect(bars).toHaveCount(2)
+    for (const scope of ['section.pg-scene', 'section.pg-visual']) {
+      const one = page.locator(scope).locator('ul.bars[aria-label="Évolution de la population, 2016 à 2022"]')
+      await expect(one, scope).toHaveCount(1)
+      const txt = await one.evaluate((f) => f.textContent ?? '')
+      expect(txt, scope).toContain('+5\u202f%')
+      expect(txt, scope).toContain('+6\u202f%')
+    }
   })
 
   test('« % » : jamais précédé d’un chiffre sans espace insécable, sur le sous-titre et les légendes de Villes natalistes', async ({ page }) => {

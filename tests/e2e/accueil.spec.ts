@@ -4,9 +4,9 @@ import { PARCOURS_STEPS } from '../../src/data/parcours'
 import { load, watchConsole } from './helpers'
 
 /**
- * Accueil réorganisé : hero → chiffres → parcours → compétences → projets → autres réalisations.
+ * Accueil : hero → chiffres → parcours (« Mon parcours », scène épinglée). Les compétences, projets et autres réalisations ne sont plus sur l'accueil.
  * Qualité de la frise « Mon parcours » (état final avec mouvement réduit émulé, comme theme.spec.ts), aux 3 viewports
- * et dans les deux thèmes : axe WCAG A/AA, ordre du DOM = ordre visuel, aucun niveau de compétence,
+ * et dans les deux thèmes : axe WCAG A/AA, ordre du DOM = ordre visuel,
  * console propre, CLS = 0, un seul backdrop-filter, aucun will-change au repos, contraste des étapes en mouvement normal.
  */
 
@@ -23,9 +23,9 @@ async function open(page: Page, theme: (typeof THEMES)[number], reduced = true) 
 
 for (const th of THEMES) {
   test.describe(`accueil, thème ${th}, mouvement réduit`, () => {
-    test('ordre des sections : hero, chiffres, parcours, compétences, projets, autres réalisations', async ({ page }) => {
+    test('ordre des sections : hero, chiffres, parcours, et rien d’autre (plus de compétences, projets ni autres réalisations)', async ({ page }) => {
       await open(page, th)
-      const names = ['Chiffres', 'Mon parcours', 'Compétences', 'Projets', 'Autres réalisations']
+      const names = ['Chiffres', 'Mon parcours']
       const ys: number[] = []
       for (const name of names) {
         const region = page.getByRole('region', { name, exact: true })
@@ -35,6 +35,8 @@ for (const th of THEMES) {
       const hero = await page.locator('.home-hero').evaluate((e) => e.getBoundingClientRect().top + window.scrollY)
       expect([hero, ...ys]).toEqual([hero, ...ys].slice().sort((a, b) => a - b))
       expect(new Set(ys).size).toBe(ys.length)
+      for (const gone of ['Compétences', 'Projets', 'Autres réalisations'])
+        await expect(page.getByRole('region', { name: gone, exact: true }), `${gone} absent de l’accueil`).toHaveCount(0)
     })
 
     test('frise : 5 étapes, toutes visibles et à l’opacité 1, ordre du DOM = ordre visuel', async ({ page }) => {
@@ -76,10 +78,12 @@ for (const th of THEMES) {
       await expect(page.locator(`${FRISE} ol.parcours-rail`).first().locator('li')).toHaveCount(PARCOURS_STEPS.filter((s) => s.column === 'formation').length)
     })
 
-    test('aucun niveau de compétence : ni progressbar, ni meter, ni pourcentage de maîtrise', async ({ page }) => {
+    test('aucun niveau de compétence sur /competences : ni progressbar, ni meter, ni pourcentage de maîtrise ; rien sur l’accueil', async ({ page }) => {
       await open(page, th)
       await expect(page.locator('[role="progressbar"], [role="meter"], meter, progress')).toHaveCount(0)
-      const skills = page.getByRole('region', { name: 'Compétences', exact: true })
+      await load(page, '/competences')
+      await expect(page.locator('[role="progressbar"], [role="meter"], meter, progress')).toHaveCount(0)
+      const skills = page.getByRole('region', { name: 'Outils', exact: true })
       await expect(skills).toHaveCount(1)
       expect(await skills.innerText()).not.toMatch(/\d\s*%/)
     })
@@ -216,7 +220,7 @@ test.describe('will-change de la frise, mouvement normal', () => {
     test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-1280', 'Fenêtre forcée : exécuté une seule fois.')
   })
   for (const th of THEMES) {
-    test(`thème ${th} : absent au repos, posé à l'écran, retiré à la sortie`, async ({ page }) => {
+    test(`thème ${th} : absent au repos, posé à l'écran, retiré à la sortie (retour en haut)`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 })
       await open(page, th, false)
       const scan = () =>
@@ -244,21 +248,24 @@ test.describe('will-change de la frise, mouvement normal', () => {
       const during = await scan()
       expect(during.active, 'data-active à l\'écran').toBe(true)
       expect(during.wc.length, 'will-change posé à l\'écran').toBeGreaterThan(0)
-      await goTo(await page.evaluate(() => document.documentElement.scrollHeight))
+      // La frise est la dernière section de l'accueil : en bas de page elle reste en partie à l'écran (au-dessus du pied de
+      // page), donc active. La sortie se vérifie en remontant en haut de page (le hero est loin de la frise).
+      await goTo(0)
       const after = await scan()
       expect(after.active).toBe(false)
-      expect(after.wc, 'bas de page').toEqual([])
+      expect(after.wc, 'retour en haut de page').toEqual([])
     })
   }
 })
 
-/* ---- Relecture finale : repère visible, espacements, retrait de la tuile, chiffres à 320 px ---- */
+/* ---- Relecture finale : repère visible (/competences), espacements, retrait de la tuile, chiffres à 320 px ---- */
 for (const th of THEMES) {
   test.describe(`accueil, relecture finale, thème ${th}`, () => {
-    test('Python : la puce GreenSD dit à l’écran « d’après mon CV » ; les autres outils sans cette mention', async ({ page }) => {
+    test('Python (/competences) : la puce GreenSD dit à l’écran « d’après mon CV » ; les autres outils sans cette mention', async ({ page }) => {
       await open(page, th)
-      const tiles = page.locator('.home-skills .home-skill')
-      const python = tiles.filter({ has: page.getByText('Python', { exact: true }) })
+      await load(page, '/competences')
+      const tiles = page.locator('li.pg-skill')
+      const python = tiles.filter({ has: page.getByRole('heading', { level: 2, name: 'Python', exact: true }) })
       await expect(python).toHaveCount(1)
       await python.scrollIntoViewIfNeeded()
       await expect(python.locator('a.pg-chip')).toContainText('d’après mon CV')
@@ -266,15 +273,16 @@ for (const th of THEMES) {
       // Le nom accessible contient le texte visible (label in name).
       await expect(python.getByRole('link', { name: /GreenSD, d’après mon CV/ })).toHaveCount(1)
       // Aucun autre outil ne porte cette mention.
-      await expect(page.locator('.home-skills .pg-chip__src')).toHaveCount(1)
+      await expect(page.locator('li.pg-skill .pg-chip__src')).toHaveCount(1)
     })
 
-    test('centres d’intérêt : écart vertical > 0 avec la section Compétences (au moins 32 px)', async ({ page }) => {
+    test('centres d’intérêt : écart vertical > 0 avec la section suivante, le pied de page (au moins 32 px)', async ({ page }) => {
       await open(page, th)
       const gap = await page.evaluate(() => {
         const lis = document.querySelectorAll('.parcours-interests__list li')
         const last = lis[lis.length - 1].getBoundingClientRect().bottom
-        const next = (document.querySelector('.home-skills') as HTMLElement).getBoundingClientRect().top
+        // La tuile du parcours est maintenant la dernière section : l'élément suivant est le pied de page.
+        const next = (document.querySelector('footer.ap-footer') as HTMLElement).getBoundingClientRect().top
         return next - last
       })
       expect(gap).toBeGreaterThan(0)

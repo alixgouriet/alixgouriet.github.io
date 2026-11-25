@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { ALL_ROUTES, load, watchConsole } from './helpers'
+import { ALL_ROUTES, FICHES, load, watchConsole } from './helpers'
 
 for (const route of ALL_ROUTES) {
   test(`console propre : ${route}`, async ({ page }) => {
@@ -74,13 +74,23 @@ test('repères : banner, un seul main, navigation principale (barre + menu), con
   }
 })
 
-test("accueil : le h1 « Alix Gouriet » est dans main et les sections portent un nom", async ({ page }) => {
+test("accueil : le h1 « Alix Gouriet » est dans main et les sections portent un nom (hero, Chiffres, Mon parcours)", async ({ page }) => {
   await load(page, '/')
   await expect(page.locator('main h1')).toHaveText(/Alix\s*Gouriet/)
   await expect(page.locator('main section[aria-labelledby="accueil-titre"]')).toHaveCount(1)
-  await expect(page.locator('main section[aria-label="Projets"]')).toHaveCount(1)
-  for (const name of ['Chiffres', 'Mon parcours', 'Compétences', 'Autres réalisations'])
+  for (const name of ['Chiffres', 'Mon parcours'])
     await expect(page.getByRole('region', { name, exact: true }), name).toHaveCount(1)
+  for (const name of ['Projets', 'Compétences', 'Autres réalisations'])
+    await expect(page.getByRole('region', { name, exact: true }), `${name} n’est plus sur l’accueil`).toHaveCount(0)
+})
+
+test('fiches : la section « Le projet en images » porte un nom et un h2 « En images » entre l’en-tête et le texte', async ({ page }) => {
+  for (const route of FICHES) {
+    await load(page, route)
+    const region = page.getByRole('region', { name: 'Le projet en images', exact: true })
+    await expect(region, route).toHaveCount(1)
+    await expect(region.getByRole('heading', { level: 2, name: 'En images', exact: true }), route).toBeVisible()
+  }
 })
 
 test('mouvement réduit : tout le contenu est visible, sans transformation résiduelle ni animation active', async ({ page }) => {

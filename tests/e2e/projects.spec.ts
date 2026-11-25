@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { FICHES, isNarrow, load } from './helpers'
+import { skills } from '../../src/data/skills'
 
 const rowsOf = (page: Page) => page.locator('main ul.pg-grid > li')
 const numsOf = (page: Page) => rowsOf(page).locator('.pg-num').allInnerTexts()
@@ -257,6 +258,23 @@ test('compétences : SAS, HTML, CSS, JavaScript « Mentionné dans mon CV » ; P
   // Le nom accessible dit la source : « d'après mon CV » pour Python.
   await expect(py.getByRole('link', { name: /d[’']après mon CV/ })).toHaveCount(1)
   await expect(py.getByText('Mentionné dans mon CV')).toHaveCount(0)
+})
+
+test('compétences : tous les outils de skills.ts, aucun niveau ni pourcentage, « d’après mon CV » visible sur Python', async ({ page }) => {
+  await load(page, '/competences')
+  const names = await page.locator('li.pg-skill h2').allTextContents()
+  expect(names.map((n) => n.trim()).sort()).toEqual(skills.map((s) => s.label).sort())
+  const section = page.getByRole('region', { name: 'Outils', exact: true })
+  await expect(section.locator('progress, meter, [role="progressbar"], [role="meter"]')).toHaveCount(0)
+  expect((await section.textContent()) ?? '').not.toMatch(/%/)
+  // Python : la source (CV) est dite à l'écran, pas seulement dans le nom accessible ; aucun autre outil ne porte la mention.
+  const py = page.locator('li.pg-skill').filter({ has: page.getByRole('heading', { level: 2, name: 'Python', exact: true }) })
+  await expect(py.locator('a.pg-chip .pg-chip__src')).toBeVisible()
+  await expect(py.locator('a.pg-chip')).toContainText('d’après mon CV')
+  await expect(page.locator('li.pg-skill .pg-chip__src')).toHaveCount(1)
+  // Les outils prouvés renvoient vers leurs fiches.
+  const sql = page.locator('li.pg-skill').filter({ has: page.getByRole('heading', { level: 2, name: 'SQL (MySQL)', exact: true }) })
+  expect(await sql.getByRole('link').count()).toBeGreaterThan(0)
 })
 
 test('contrôle segmenté : l\'option cochée est mise en évidence (poids, fond) après un clic', async ({ page }) => {
