@@ -79,7 +79,7 @@ test("accueil : le h1 « Alix Gouriet » est dans main et les sections portent u
   await expect(page.locator('main h1')).toHaveText(/Alix\s*Gouriet/)
   await expect(page.locator('main section[aria-labelledby="accueil-titre"]')).toHaveCount(1)
   await expect(page.locator('main section[aria-label="Projets"]')).toHaveCount(1)
-  for (const name of ['Autres réalisations', 'Compétences', 'À propos'])
+  for (const name of ['Chiffres', 'Mon parcours', 'Compétences', 'Autres réalisations'])
     await expect(page.getByRole('region', { name, exact: true }), name).toHaveCount(1)
 })
 

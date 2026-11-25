@@ -160,6 +160,16 @@ export function provenToolLabels(list: Project[] = projects): string[] {
   return skills.filter((s) => ids.has(s.id)).map((s) => shortLabel(s.id))
 }
 
+/** Trois chiffres de la page d'accueil, calculés par `stats` (aucun nombre en dur). */
+export function homeFigures(list: Project[] = projects): { label: string; value: number }[] {
+  const s = stats(list)
+  return [
+    { label: 'Réalisations', value: s.total },
+    { label: 'Fiches détaillées', value: s.detailed },
+    { label: 'Outils cités', value: s.tools },
+  ]
+}
+
 /** Pluriel français : 0 et 1 au singulier. */
 export function plural(n: number, one: string, many: string = `${one}s`): string {
   return n > 1 ? many : one

@@ -5,7 +5,8 @@ interface SceneProps {
   /** Nombre d'étapes : fixe la hauteur de la scène (--n) et le rythme des étapes. */
   steps: number
   className?: string
-  labelledBy: string
+  /** Identifiant du titre qui nomme la scène. Omis quand la section parente porte déjà le nom (évite un doublon annoncé). */
+  labelledBy?: string
   children: ReactNode
 }
 

@@ -20,6 +20,7 @@ import {
   stats,
   usedTools,
   accroche,
+  homeFigures,
   provenToolLabels,
   plural,
 } from '../../src/data/derive.ts'
@@ -236,6 +237,20 @@ describe('outils réels (liste blanche)', () => {
 })
 
 describe('compteurs d\'en-tête et accroche', () => {
+  it('homeFigures : trois chiffres, dans l’ordre, calculés sur stats', () => {
+    expect(homeFigures()).toEqual([
+      { label: 'Réalisations', value: 9 },
+      { label: 'Fiches détaillées', value: 4 },
+      { label: 'Outils cités', value: 15 },
+    ])
+    const s = stats(projects.slice(0, 1))
+    expect(homeFigures(projects.slice(0, 1))).toEqual([
+      { label: 'Réalisations', value: s.total },
+      { label: 'Fiches détaillées', value: s.detailed },
+      { label: 'Outils cités', value: s.tools },
+    ])
+  })
+
   it('calculés sur les données : 9 réalisations, 4 fiches, 15 outils', () => {
     expect(stats(projects)).toEqual({ total: 9, detailed: 4, tools: 15 })
     expect(stats(projects.slice(0, 2))).toEqual({ total: 2, detailed: 2, tools: stats(projects.slice(0, 2)).tools })

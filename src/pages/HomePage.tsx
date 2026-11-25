@@ -1,8 +1,10 @@
 import { Link } from 'react-router'
+import { HomeFigures } from '../features/home/HomeFigures.tsx'
+import { HomeSkills } from '../features/home/HomeSkills.tsx'
+import { ParcoursScene } from '../features/home/ParcoursScene.tsx'
 import { ProjectTiles } from '../features/home/ProjectTiles.tsx'
 import { PendingTiles } from '../features/home/PendingTiles.tsx'
-import { ACCROCHE, ABOUT_SHORT } from '../data/copy.ts'
-import { skills } from '../data/skills.ts'
+import { ACCROCHE } from '../data/copy.ts'
 
 export function HomePage() {
   return (
@@ -42,6 +44,10 @@ export function HomePage() {
         </div>
       </section>
 
+      <HomeFigures />
+      <ParcoursScene />
+      <HomeSkills />
+
       <section id="projets" className="ap-section ap-section--white home-projects" aria-label="Projets">
         <div className="ap-container ap-container--wide ap-center">
           {/* À VALIDER PAR ALIX : accroche de l'accueil (src/data/copy.ts). */}
@@ -56,38 +62,6 @@ export function HomePage() {
             Autres réalisations
           </h2>
           <PendingTiles />
-        </div>
-      </section>
-
-      <section className="ap-section ap-section--gray" aria-labelledby="competences-titre">
-        <div className="ap-container ap-center">
-          <h2 id="competences-titre" className="ap-title-lg">
-            Compétences
-          </h2>
-          <p className="ap-subtitle home-block__sub">
-            Chaque outil renvoie aux projets qui le prouvent, ou indique qu’il vient de mon CV.
-          </p>
-          <ul className="home-chips" aria-label="Outils">
-            {skills.map((s) => (
-              <li key={s.id}>{s.label}</li>
-            ))}
-          </ul>
-          <Link to="/competences" className="ap-link-more" viewTransition>
-            Voir les compétences
-          </Link>
-        </div>
-      </section>
-
-      <section className="ap-section ap-section--white" aria-labelledby="apropos-titre">
-        <div className="ap-container ap-container--narrow ap-center">
-          <h2 id="apropos-titre" className="ap-title-lg">
-            À propos
-          </h2>
-          {/* À VALIDER PAR ALIX : phrase courte de l'accueil (src/data/copy.ts). */}
-          <p className="ap-subtitle home-block__sub">{ABOUT_SHORT}</p>
-          <Link to="/a-propos" className="ap-link-more" viewTransition>
-            En savoir plus
-          </Link>
         </div>
       </section>
     </>

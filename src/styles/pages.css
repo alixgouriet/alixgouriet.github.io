@@ -732,6 +732,10 @@ a.pg-next:active {
     color: var(--ap-on-link);
   }
 }
+.pg-chip__src {
+  font-size: 0.875em;
+  white-space: normal;
+}
 .pg-cv {
   margin: 0;
   font-size: 1.0625rem;

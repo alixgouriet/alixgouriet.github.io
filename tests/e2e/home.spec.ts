@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FICHES, load } from './helpers'
+import { skills } from '../../src/data/skills'
 
 const ACCROCHE = '9 réalisations, dont 4 détaillées, avec SQL, R, Excel et VBA.'
 
@@ -119,18 +120,52 @@ test('accueil : « Autres réalisations », 5 demi-tuiles aria-disabled sans lie
   }
 })
 
-test('accueil : sections Compétences (9 outils, lien) et À propos (phrase, lien)', async ({ page }) => {
+test('accueil : rangée de chiffres calculés (9 réalisations, 4 fiches détaillées, 15 outils cités)', async ({ page }) => {
   await load(page, '/')
-  const skills = page.getByRole('region', { name: 'Compétences', exact: true })
-  await expect(skills.getByRole('heading', { level: 2, name: 'Compétences' })).toBeVisible()
-  await expect(skills.getByRole('list', { name: 'Outils' }).getByRole('listitem')).toHaveCount(9)
-  await expect(skills.getByRole('link', { name: 'Voir les compétences' })).toHaveAttribute('href', '/competences')
-  const about = page.getByRole('region', { name: 'À propos', exact: true })
-  await expect(about.getByRole('heading', { level: 2, name: 'À propos' })).toBeVisible()
-  await expect(about).toContainText('BUT Science des Données')
-  await expect(about.getByRole('link', { name: 'En savoir plus' })).toHaveAttribute('href', '/a-propos')
-  await about.getByRole('link', { name: 'En savoir plus' }).click()
-  await expect(page).toHaveURL('/a-propos')
+  const figures = page.getByRole('region', { name: 'Chiffres', exact: true })
+  await expect(figures).toHaveCount(1)
+  await expect(figures.getByRole('heading')).toHaveCount(0) // pas de titre visible
+  const pairs = await figures.locator('dl > div').evaluateAll((rows) =>
+    rows.map((r) => [r.querySelector('dt')?.textContent?.trim(), r.querySelector('dd')?.textContent?.trim()]),
+  )
+  expect(pairs).toEqual([
+    ['Réalisations', '9'],
+    ['Fiches détaillées', '4'],
+    ['Outils cités', '15'],
+  ])
+})
+
+test('accueil : « Compétences » liste les outils de skills.ts, groupés, sans niveau ni pourcentage', async ({ page }) => {
+  await load(page, '/')
+  const section = page.getByRole('region', { name: 'Compétences', exact: true })
+  await expect(section.getByRole('heading', { level: 2, name: 'Compétences' })).toBeVisible()
+  const names = await section.locator('.home-skill__name').allTextContents()
+  expect(names.map((n) => n.trim()).sort()).toEqual(skills.map((s) => s.label).sort())
+  expect(await section.getByRole('heading', { level: 3 }).count()).toBeGreaterThanOrEqual(2)
+  // Outils sans projet : « Mentionné dans mon CV ».
+  for (const label of ['SAS', 'HTML', 'CSS', 'JavaScript']) {
+    const item = section.locator('.home-skill', { has: page.getByText(label, { exact: true }) })
+    await expect(item, label).toContainText('Mentionné dans mon CV')
+    await expect(item.getByRole('link')).toHaveCount(0)
+  }
+  // Python : source = CV (GreenSD), dit dans le nom accessible du lien.
+  const python = section.locator('.home-skill', { has: page.getByText('Python', { exact: true }) })
+  await expect(python.getByRole('link', { name: /utilisé dans GreenSD, d[’']après mon CV/ })).toHaveAttribute('href', '/projets/greensd')
+  // Les outils prouvés renvoient vers leurs fiches.
+  const sql = section.locator('.home-skill', { has: page.getByText('SQL (MySQL)', { exact: true }) })
+  expect(await sql.getByRole('link').count()).toBeGreaterThan(0)
+  // Aucun niveau.
+  await expect(section.getByRole('progressbar')).toHaveCount(0)
+  await expect(section.getByRole('meter')).toHaveCount(0)
+  await expect(section.locator('progress, meter, [role="progressbar"], [role="meter"]')).toHaveCount(0)
+  expect(((await section.textContent()) ?? '')).not.toMatch(/%/)
+})
+
+test('accueil : plus de section « À propos » courte ni de rubrique « valeurs »', async ({ page }) => {
+  await load(page, '/')
+  await expect(page.getByRole('region', { name: 'À propos', exact: true })).toHaveCount(0)
+  await expect(page.locator('main').getByRole('heading', { name: 'À propos' })).toHaveCount(0)
+  await expect(page.locator('main').getByText(/valeurs/i)).toHaveCount(0)
 })
 
 test('accueil : bandeau « Stage de 10 semaines dès avril 2027 » juste sous la barre, lien « Me contacter › »', async ({ page }) => {
@@ -145,8 +180,8 @@ test('accueil : bandeau « Stage de 10 semaines dès avril 2027 » juste sous la
   expect(bar.y).toBeGreaterThanOrEqual(header.y + header.height - 1)
 })
 
-test('accueil : ordre des sections (hero, accroche et projets, autres réalisations, compétences, à propos)', async ({ page }) => {
+test('accueil : ordre des sections (hero, chiffres, parcours, compétences, projets, autres réalisations)', async ({ page }) => {
   await load(page, '/')
   const order = await page.locator('main > section').evaluateAll((els) => els.map((e) => e.getAttribute('aria-labelledby') ?? e.getAttribute('aria-label')))
-  expect(order).toEqual(['accueil-titre', 'Projets', 'autres-titre', 'competences-titre', 'apropos-titre'])
+  expect(order).toEqual(['accueil-titre', 'Chiffres', 'parcours-titre', 'competences-titre', 'Projets', 'autres-titre'])
 })

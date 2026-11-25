@@ -1,0 +1,167 @@
+/*
+ * parcours.css : scène « Mon parcours » (ParcoursScene.tsx). Réutilise scene-* de scenes.css ; seule la mise en page propre est ici.
+ * Régime 1 (défaut) : colonne normale, tout à l'état final. Régime 2 (même media query que scenes.css) : épinglé,
+ * étapes qui s'allument (--i, --n, --p), rail qui se remplit en scaleY. transform et opacity seulement.
+ */
+
+/* ---------- Régime 1 : flux normal ---------- */
+.scene--parcours {
+  min-height: 0;
+  /* Même retrait latéral que les tuiles de projets (.home-stack) : la tuile ne touche pas les bords de l'écran. */
+  width: min(100% - 2 * var(--ap-gap), 1680px);
+  margin-inline: auto;
+}
+.parcours-body {
+  align-items: start;
+  gap: clamp(2rem, 5vw, 3rem);
+}
+.parcours-col {
+  width: min(100%, 34rem);
+  min-width: 0;
+  text-align: left;
+}
+.parcours-col__title {
+  margin: 0 0 1rem;
+}
+.parcours-rail {
+  --fill: 1;
+  position: relative;
+  display: grid;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0 0 0 1.75rem;
+  list-style: none;
+}
+.parcours-rail::before,
+.parcours-rail::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 2px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--ap-fg) 22%, transparent);
+}
+.parcours-rail::after {
+  background: var(--ap-link-c);
+  transform-origin: 50% 0;
+  transform: scaleY(var(--fill));
+}
+.parcours-step {
+  --r: 1;
+  position: relative;
+  min-width: 0;
+}
+/* Point : base discrète, puis point allumé par-dessus (opacité). */
+.parcours-step::before,
+.parcours-step::after {
+  content: '';
+  position: absolute;
+  left: calc(-1.75rem - 4px);
+  top: 0.35rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.parcours-step::before {
+  background: var(--ap-tile-gray);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ap-fg) 40%, transparent);
+}
+.parcours-step::after {
+  background: var(--ap-link-c);
+  opacity: var(--r);
+}
+.parcours-step__when {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ap-fg-3);
+}
+.parcours-step__title {
+  margin: 0.15rem 0 0;
+  font-size: 1.1875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.parcours-step__text {
+  margin: 0.3rem 0 0;
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  color: var(--ap-fg-2);
+  overflow-wrap: anywhere;
+}
+
+/* Centres d'intérêt : sous la scène, toujours en flux normal. */
+.parcours-interests {
+  padding-block: clamp(2rem, 5vw, 3rem) clamp(2.5rem, 6vw, 4rem);
+  text-align: center;
+}
+.parcours-interests__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.parcours-interests__list li {
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--ap-pill-radius);
+  background: var(--ap-tile-gray);
+  color: var(--ap-fg-2);
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+
+/* ---------- Régime 2 : épinglé (même condition que PINNED_QUERY et scenes.css) ---------- */
+@media (min-width: 1024px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+  .scene.scene--parcours {
+    height: calc(150svh + var(--n) * 18svh);
+    padding: 0;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+  .scene--parcours .parcours-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-items: center;
+    align-items: start;
+    align-content: center;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+  /* Plancher d'opacité 0,75 et texte en --ap-fg : lisible (AA) même pour les étapes pas encore actives, sur fond gris clair ou sombre. */
+  .parcours-step {
+    opacity: max(0.75, min(var(--in), var(--out)));
+  }
+  .parcours-step__when,
+  .parcours-step__text {
+    color: var(--ap-fg);
+  }
+  /* Le rail se remplit colonne par colonne : de --from à --from + --count étapes. */
+  .parcours-rail {
+    --s: calc(var(--p) * var(--n));
+    --fill: clamp(0, calc((var(--s) - var(--from) + 0.15) / var(--count)), 1);
+  }
+  /* Point : allumé de (i − 0,6)/N à i/N, donc plein dès que l'étape est active (étape 0 : allumée dès p = 0). */
+  .parcours-step {
+    --r: clamp(0, calc((var(--p) - var(--k)) / var(--w)), 1);
+  }
+  /* scenes.css fixe --out: 1 sur le dernier li de chaque ol : ici, seule la toute dernière étape de la frise reste à 1. */
+  .scene--parcours .scene-step:last-child {
+    --out: clamp(0.65, calc(1 - (var(--s) - var(--i) - 0.85) * 2.3333), 1);
+  }
+  .scene--parcours .parcours-col:last-child .scene-step:last-child {
+    --out: 1;
+  }
+  .scene[data-active] .parcours-rail::after {
+    will-change: transform;
+  }
+  .scene[data-active] .parcours-step::after {
+    will-change: opacity;
+  }
+}

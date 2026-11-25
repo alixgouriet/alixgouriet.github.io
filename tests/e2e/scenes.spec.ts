@@ -9,6 +9,7 @@ import { load, watchConsole } from './helpers'
 
 const PINNED = { width: 1280, height: 800 }
 const SCENES = [
+  { slug: 'parcours', steps: 5 },
   { slug: 'villes-natalistes', steps: 2 },
   { slug: 'prix-immobiliers-niortais', steps: 5 },
   { slug: 'educheck', steps: 5 },
@@ -75,7 +76,7 @@ async function sweep(page: Page, onStep?: (y: number) => Promise<void>, stepPx?:
 
 /* ------------------------------------------------------------------ (1) épinglage et progression */
 test.describe('scènes : épinglage et progression --p (1280 × 800)', () => {
-  test('4 scènes ; stage sticky top 0 ; hauteurs (150 + 18 × étapes) svh', async ({ page }, ti) => {
+  test('5 scènes (parcours + 4 projets) ; stage sticky top 0 ; hauteurs (150 + 18 × étapes) svh', async ({ page }, ti) => {
     onlyDesktop(ti)
     await openHome(page, PINNED)
     const info = await page.evaluate(() =>
@@ -84,7 +85,7 @@ test.describe('scènes : épinglage et progression --p (1280 × 800)', () => {
         return { slug: [...s.classList].find((c) => c.startsWith('scene--')), pos: cs.position, top: cs.top, h: s.offsetHeight }
       }),
     )
-    expect(info).toHaveLength(4)
+    expect(info).toHaveLength(5)
     for (const [i, s] of info.entries()) {
       expect(s.pos, `scène ${i + 1} position`).toBe('sticky')
       expect(s.top, `scène ${i + 1} top`).toBe('0px')
@@ -98,7 +99,7 @@ test.describe('scènes : épinglage et progression --p (1280 × 800)', () => {
     onlyDesktop(ti)
     await openHome(page, PINNED)
     const geo = await geometry(page)
-    expect(geo).toHaveLength(4)
+    expect(geo).toHaveLength(5)
     for (const [i, g] of geo.entries()) {
       for (const [frac, label] of [[0, 'haut'], [0.5, 'mi-parcours'], [1, 'bas']] as const) {
         await scrollToY(page, g.top + g.travel * frac)
@@ -353,7 +354,7 @@ test.describe('scènes : prefers-reduced-motion', () => {
     expect(bad).toEqual([])
   })
 
-  test('reduced-motion : barre locale en opacité seule (aucun transform) et les 4 scènes lisibles', async ({ page }, ti) => {
+  test('reduced-motion : barre locale en opacité seule (aucun transform) et les 5 scènes lisibles', async ({ page }, ti) => {
     onlyDesktop(ti)
     await openHome(page, PINNED, true)
     await scrollToY(page, 1500)
@@ -382,7 +383,7 @@ test.describe('scènes : flux normal hors épinglage', () => {
       const res = await page.evaluate((vh) => {
         const out: string[] = []
         const scenes = [...document.querySelectorAll<HTMLElement>('article.scene')]
-        if (scenes.length !== 4) out.push(`${scenes.length} scènes`)
+        if (scenes.length !== 5) out.push(`${scenes.length} scènes`)
         for (const s of scenes) {
           const name = [...s.classList].find((x) => x.startsWith('scene--'))
           const stage = s.querySelector<HTMLElement>('.scene-stage')!
@@ -413,7 +414,7 @@ test.describe('scènes : flux normal hors épinglage', () => {
       await expect(page.getByRole('list', { name: /^Étapes : / })).toHaveCount(4)
       await expect(page.getByRole('link', { name: /^En savoir plus sur / })).toHaveCount(4)
       const steps = await page.locator('.scene-step').evaluateAll((l) => l.length)
-      expect(steps).toBe(17)
+      expect(steps).toBe(22)
       // Balayage : toujours aucun débordement horizontal.
       const overflow: string[] = []
       await sweep(page, async (y) => {

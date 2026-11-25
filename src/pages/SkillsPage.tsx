@@ -1,5 +1,5 @@
-import { Link } from 'react-router'
 import { skillsWithProofs } from '../data/derive.ts'
+import { SkillProofs } from '../features/skills/SkillProofs.tsx'
 
 export function SkillsPage() {
   const rows = skillsWithProofs()
@@ -18,28 +18,7 @@ export function SkillsPage() {
             {rows.map(({ skill, proofs }) => (
               <li key={skill.id} className="ap-tile ap-tile--gray pg-skill ap-reveal">
                 <h2 className="ap-title-md">{skill.label}</h2>
-                {proofs.length > 0 ? (
-                  <ul className="pg-chips">
-                    {proofs.map((p) => (
-                      <li key={p.slug}>
-                        <Link
-                          to={`/projets/${p.slug}`}
-                          className="pg-chip"
-                          aria-label={
-                            p.toolsFromCv?.includes(skill.id)
-                              ? `${skill.label}, utilisé dans ${p.title}, d’après mon CV`
-                              : `${skill.label}, prouvé par ${p.title}`
-                          }
-                          viewTransition
-                        >
-                          {p.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="pg-cv">Mentionné dans mon CV</p>
-                )}
+                <SkillProofs skill={skill} proofs={proofs} />
               </li>
             ))}
           </ul>
